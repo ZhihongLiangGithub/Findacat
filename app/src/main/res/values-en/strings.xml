@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Find a Cat</string>
+    <string name="find_a_cat">find a cat</string>
+    <string name="favourite_cats">favourite cats</string>
+    <string name="cat_fact">cat fact:</string>
+    <string name="cat_name">Name: %s</string>
+    <string name="cat_gender">Gender: %s</string>
+    <string name="cat_breed">Breed: %s</string>
+    <string name="cat_zip">Zip: %s</string>
+    <string name="description_placeholder">This is the description of the cat!</string>
+</resources>
