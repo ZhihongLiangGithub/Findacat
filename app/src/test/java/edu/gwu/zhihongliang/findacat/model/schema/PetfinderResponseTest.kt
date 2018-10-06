@@ -2,9 +2,11 @@ package edu.gwu.zhihongliang.findacat.model.schema
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import edu.gwu.zhihongliang.findacat.ObjectAsListJsonAdapterFactory
+import edu.gwu.zhihongliang.findacat.model.CatInfo
+import edu.gwu.zhihongliang.findacat.model.schema.adapter.ObjectAsListJsonAdapterFactory
 import org.junit.Assert
 import org.junit.Test
+
 
 class PetfinderResponseTest {
 
@@ -14,12 +16,12 @@ class PetfinderResponseTest {
                 .add(ObjectAsListJsonAdapterFactory())
                 .build()
         val adapter = moshi.adapter(PetfinderResponse::class.java)
-        val petfinderResponse = adapter.fromJson(json)
-        petfinderResponse?.let {
-            Assert.assertNotNull(it.petfinder.pets.pet[0].name.t)
+        val response = adapter.fromJson(json)
+        response?.let {
+            val catInfoList = it.petfinder.pets.pet.map { CatInfo.adaptedFrom(it) }
+            Assert.assertNotNull(catInfoList)
         }
     }
-
 
     private val json = """
     {

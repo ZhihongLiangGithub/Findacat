@@ -1,4 +1,4 @@
-package edu.gwu.zhihongliang.findacat
+package edu.gwu.zhihongliang.findacat.model.schema.adapter
 
 import com.squareup.moshi.*
 import java.lang.reflect.Type
