@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import edu.gwu.zhihongliang.findacat.Const
+import edu.gwu.zhihongliang.findacat.PersistenceManager
 import edu.gwu.zhihongliang.findacat.R
 import edu.gwu.zhihongliang.findacat.RetrofitManager
 import edu.gwu.zhihongliang.findacat.adapter.CatAdapter
@@ -21,6 +22,10 @@ import retrofit2.Response
 class PetsActivity : AppCompatActivity(), CatAdapter.OnItemClickListener {
 
     private val TAG = "PetsActivity"
+    private val FAVOURITE_DETAIL_REQUEST = 1
+    private val persistenceManager: PersistenceManager by lazy { PersistenceManager(this) }
+    private lateinit var catInfoList: MutableList<CatInfo>
+    private lateinit var type: String
 
     companion object {
 
@@ -36,7 +41,7 @@ class PetsActivity : AppCompatActivity(), CatAdapter.OnItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pets)
-        val type = intent.getStringExtra(TYPE)
+        type = intent.getStringExtra(TYPE)
         when (type) {
             MainActivity.FIND -> displayFindCat()
             MainActivity.FAVOURITE -> displayFavouriteCat()
@@ -70,7 +75,7 @@ class PetsActivity : AppCompatActivity(), CatAdapter.OnItemClickListener {
             override fun onResponse(call: Call<PetfinderResponse>, response: Response<PetfinderResponse>) {
                 val body = response.body()
                 if (body != null) {
-                    val catInfoList = body.petfinder.pets.pet.map { CatInfo.adaptedFrom(it) }
+                    catInfoList = body.petfinder.pets.pet.map { CatInfo.adaptedFrom(it) } as MutableList
                     //set adapter for RecyclerView
                     if (!catInfoList.isEmpty()) {
                         catInfo_rv.adapter = CatAdapter(catInfoList, this@PetsActivity)
@@ -85,11 +90,37 @@ class PetsActivity : AppCompatActivity(), CatAdapter.OnItemClickListener {
 
 
     private fun displayFavouriteCat() {
-        //TODO
+        catInfoList = persistenceManager.findAllFavouriteCats()
+        if (!catInfoList.isEmpty()) {
+            catInfo_rv.adapter = CatAdapter(catInfoList, this@PetsActivity)
+        }
     }
 
     override fun onItemClick(catInfo: CatInfo, itemView: View) {
         val intent = PetDetailActivity.newIntent(this@PetsActivity, catInfo)
-        startActivity(intent)
+        when (type) {
+            MainActivity.FIND -> startActivity(intent)
+            MainActivity.FAVOURITE -> startActivityForResult(intent, FAVOURITE_DETAIL_REQUEST)
+        }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == FAVOURITE_DETAIL_REQUEST) {
+            if (resultCode == PetDetailActivity.RESULT_NOT_FAVOURITE) {
+                val id = data?.getStringExtra("id")
+                catInfoList.removeIf { it.id == id }
+                catInfo_rv.adapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+    override fun onBackPressed() {
+        //save sharePreference
+        if (type == MainActivity.FAVOURITE) {
+            persistenceManager.saveFavouriteCats(catInfoList)
+        }
+        super.onBackPressed()
+    }
+
+
 }

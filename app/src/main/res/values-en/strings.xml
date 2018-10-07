@@ -9,4 +9,6 @@
     <string name="cat_breed">Breed: %s</string>
     <string name="cat_zip">Zip: %s</string>
     <string name="description_placeholder">This is the description of the cat!</string>
+    <string name="share">share</string>
+    <string name="favourite">favourite</string>
 </resources>
