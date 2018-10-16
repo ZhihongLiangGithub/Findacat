@@ -3,6 +3,9 @@
     package="edu.gwu.zhihongliang.findacat">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -10,16 +13,19 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".activity.MainActivity">
+        android:theme="@style/AppTheme">
+        <activity android:name="edu.gwu.zhihongliang.findacat.ui.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PetsActivity" />
-        <activity android:name=".activity.PetDetailActivity" />
+        <activity android:name="edu.gwu.zhihongliang.findacat.ui.activity.PetDetailActivity" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDteheVDECdgLXC0YLTGq-ngwFUrNE2ZKg" />
     </application>
 
 </manifest>
