@@ -5,7 +5,9 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.util.Log
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import edu.gwu.zhihongliang.findacat.model.CatInfo
 
 
@@ -28,7 +30,8 @@ class PersistenceManager(private val context: Context) {
             true -> mutableListOf()
             else -> {
                 val type = Types.newParameterizedType(MutableList::class.java, CatInfo::class.java)
-                val adapter: JsonAdapter<MutableList<CatInfo>> = MoshiManager.getInstance().adapter(type)
+                val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                val adapter: JsonAdapter<MutableList<CatInfo>> = moshi.adapter(type)
                 return adapter.fromJson(catsJson) as MutableList<CatInfo>
             }
         }
@@ -36,7 +39,8 @@ class PersistenceManager(private val context: Context) {
 
     fun saveFavouriteCats(catInfoSet: MutableList<CatInfo>) {
         val type = Types.newParameterizedType(MutableList::class.java, CatInfo::class.java)
-        val adapter: JsonAdapter<MutableList<CatInfo>> = MoshiManager.getInstance().adapter(type)
+        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+        val adapter: JsonAdapter<MutableList<CatInfo>> = moshi.adapter(type)
         val json = adapter.toJson(catInfoSet)
         sharedPreferences.edit().putString(FAVOURITE, json).apply()
     }
