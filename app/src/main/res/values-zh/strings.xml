@@ -19,7 +19,7 @@
     <string name="search_zip">Search zip</string>
     <string name="enter_zip">Enter zip</string>
     <string name="zip_unavailale">Cannot optain zip from this address. Please try another one!</string>
-    <string name="zip_invalid">Zip code is unvalid. Please try again.</string>
+    <string name="zip_invalid">Zip code is invalid. Please try again.</string>
     <string name="no_internet">Internet not connected. Please try again.</string>
     <string name="cat_fact_failure">Cat Fact Api failure!</string>
     <string name="google_play_failure">Google Play service failure!</string>

@@ -10,21 +10,21 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
 
-object PetfinderFetcher {
+class Petfinder(private val onCompleteListener: OnCompleteListener) {
 
-    private val TAG = "PetfinderFetcher"
+    private val TAG = "Petfinder"
 
     interface apiEndpointInterface {
         @GET("pet.find")
         fun getPetFind(@QueryMap params: Map<String, String>): Call<PetfinderResponse>
     }
 
-    interface onCompleteListener {
+    interface OnCompleteListener {
         fun petfinderSuccess(petfinderResponse: PetfinderResponse)
         fun petfinderFail()
     }
 
-    fun fetchData(zip: String, onCompleteListener: onCompleteListener) {
+    fun getPetFindDataByZip(zip: String) {
         val apiEndPoint = RetrofitManager.getPetfinderInstance().create(apiEndpointInterface::class.java)
         val params = hashMapOf(
                 "key" to Const.PETFINDER_API_KEY,

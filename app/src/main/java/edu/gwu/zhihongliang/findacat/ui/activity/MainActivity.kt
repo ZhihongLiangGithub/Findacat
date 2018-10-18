@@ -12,8 +12,9 @@ import android.text.InputType
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import edu.gwu.zhihongliang.findacat.LocationDetector
 import edu.gwu.zhihongliang.findacat.R
-import edu.gwu.zhihongliang.findacat.api.CatFactsFetcher
+import edu.gwu.zhihongliang.findacat.api.CatFacts
 import edu.gwu.zhihongliang.findacat.ui.fragment.FavouriteFragment
 import edu.gwu.zhihongliang.findacat.ui.fragment.FindFragment
 import edu.gwu.zhihongliang.findacat.util.ConnectivityUtil
@@ -23,11 +24,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(),
         BottomNavigationView.OnNavigationItemSelectedListener,
-        CatFactsFetcher.onCompleteListener {
+        CatFacts.OnCompleteListener {
 
     private val TAG = "MainActivity"
     private var prevBottomNaviSelected = -1
-    private val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+    private lateinit var catFacts: CatFacts
 
     companion object {
         val KEY_SEARCH_ZIP = "zip"
@@ -36,6 +37,7 @@ class MainActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        catFacts = CatFacts(this)
         //set up toolbar
         setSupportActionBar(main_toolbar)
         this.setTitle(R.string.app_name)
@@ -46,7 +48,7 @@ class MainActivity : AppCompatActivity(),
                 != PackageManager.PERMISSION_GRANTED) {
             //request permission
             ActivityCompat.requestPermissions(this,
-                    arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
+                    arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LocationDetector.LOCATION_PERMISSION_REQUEST_CODE)
         } else {
             bottomNavigationView.selectedItemId = R.id.navi_home
         }
@@ -55,9 +57,10 @@ class MainActivity : AppCompatActivity(),
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         when (requestCode) {
-            MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
+            LocationDetector.LOCATION_PERMISSION_REQUEST_CODE -> {
                 if (permissions.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.i(TAG, "ACCESS_FINE_LOCATION permission granted")
+                    prevBottomNaviSelected = -1
                     bottomNavigationView.selectedItemId = R.id.navi_home
                 } else {
                     //permission denied
@@ -88,13 +91,14 @@ class MainActivity : AppCompatActivity(),
                 } else if (result != null) {
                     val zip = result.value
                     Log.i(TAG, "zip: $zip")
-                    // open FindFragment
                     prevBottomNaviSelected = R.id.navi_home
                     bottomNavigationView.selectedItemId = R.id.navi_home
-                    val args = Bundle()
-                    args.putString(KEY_SEARCH_ZIP, zip)
-                    val fragment = FindFragment.newInstance()
-                    fragment.arguments = args
+                    // open FindFragment
+                    val fragment = FindFragment.newInstance().apply {
+                        arguments = Bundle().apply {
+                            putString(KEY_SEARCH_ZIP, zip)
+                        }
+                    }
                     supportFragmentManager.beginTransaction().replace(R.id.container, fragment).commit()
                     searchView.isIconified = true
                     searchZip.collapseActionView()
@@ -113,7 +117,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.menu_cat_fact -> CatFactsFetcher.fetchData(this)
+            R.id.menu_cat_fact -> catFacts.getFactData()
         }
         return super.onOptionsItemSelected(item)
     }

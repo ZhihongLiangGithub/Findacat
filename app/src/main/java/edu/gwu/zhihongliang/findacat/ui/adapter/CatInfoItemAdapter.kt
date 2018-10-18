@@ -51,7 +51,7 @@ class CatInfoItemAdapter(private val catInfoList: List<CatInfo>,
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         (holder as ViewHolder).bind(catInfoList[position], clickListener)
-        setAnimation(holder.itemView, position);
+        setAnimation(holder.itemView, position)
     }
 
     override fun getItemCount(): Int {

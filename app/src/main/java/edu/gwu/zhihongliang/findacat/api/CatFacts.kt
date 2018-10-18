@@ -8,21 +8,21 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.http.GET
 
-object CatFactsFetcher {
+class CatFacts(private val onCompleteListener: OnCompleteListener) {
 
-    private val TAG = "CatFactsFetcher"
+    private val TAG = "CatFacts"
 
     interface apiEndpointInterface {
         @GET("fact")
         fun getFact(): Call<CatFactResponse>
     }
 
-    interface onCompleteListener {
+    interface OnCompleteListener {
         fun catFactSuccess(fact: String)
         fun catFactFail()
     }
 
-    fun fetchData(onCompleteListener: onCompleteListener) {
+    fun getFactData() {
         val apiEndPoint = RetrofitManager.getCatFactsInstance()
                 .create(apiEndpointInterface::class.java)
         apiEndPoint.getFact()
@@ -35,7 +35,6 @@ object CatFactsFetcher {
                     override fun onResponse(call: Call<CatFactResponse>?, response: Response<CatFactResponse>?) {
                         val fact = response?.body()?.fact ?: return onCompleteListener.catFactFail()
                         onCompleteListener.catFactSuccess(fact)
-
                     }
                 })
     }

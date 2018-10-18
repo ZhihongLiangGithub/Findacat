@@ -15,8 +15,8 @@ class PersistenceManager(private val context: Context) {
 
     private val TAG = "PersistenceManager"
 
-    private val FAVOURITE = "favourite"
-    private val ZIP = "zip"
+    private val KEY_FAVOURITE = "favourite"
+    private val KEY_ZIP = "zip"
     private val ZIP_DEFAULT = "22202"
 
 
@@ -25,7 +25,7 @@ class PersistenceManager(private val context: Context) {
     }
 
     fun findAllFavouriteCats(): MutableList<CatInfo> {
-        val catsJson = sharedPreferences.getString(FAVOURITE, "")
+        val catsJson = sharedPreferences.getString(KEY_FAVOURITE, "")
         return when (catsJson.isEmpty()) {
             true -> mutableListOf()
             else -> {
@@ -42,15 +42,15 @@ class PersistenceManager(private val context: Context) {
         val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
         val adapter: JsonAdapter<MutableList<CatInfo>> = moshi.adapter(type)
         val json = adapter.toJson(catInfoSet)
-        sharedPreferences.edit().putString(FAVOURITE, json).apply()
+        sharedPreferences.edit().putString(KEY_FAVOURITE, json).apply()
     }
 
     fun saveZip(zip: String) {
-        sharedPreferences.edit().putString(ZIP, zip).apply()
+        sharedPreferences.edit().putString(KEY_ZIP, zip).apply()
     }
 
     fun getZip(): String {
-        var zip = sharedPreferences.getString(ZIP, "")
+        var zip = sharedPreferences.getString(KEY_ZIP, "")
         return if (zip.isEmpty()) {
             Log.e(TAG, "unable to get last zip, return default: $ZIP_DEFAULT")
             return ZIP_DEFAULT
