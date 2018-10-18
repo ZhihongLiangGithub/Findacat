@@ -23,4 +23,6 @@
     <string name="no_internet">Internet not connected. Please try again.</string>
     <string name="cat_fact_failure">Cat Fact Api failure!</string>
     <string name="google_play_failure">Google Play service failure!</string>
+    <string name="share_text">Hi! I found a cat named %1$s in %2$s! Check this out! %3$s</string>
+    <string name="email_text">Hi! I am interested in the cat named %s. Can I have more information about this cat?</string>
 </resources>

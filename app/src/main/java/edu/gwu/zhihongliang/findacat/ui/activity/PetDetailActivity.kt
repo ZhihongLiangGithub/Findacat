@@ -2,10 +2,9 @@ package edu.gwu.zhihongliang.findacat.ui.activity
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import android.support.v4.view.MenuItemCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.ShareActionProvider
 import android.view.Menu
 import android.view.MenuItem
 import com.squareup.picasso.Picasso
@@ -45,7 +44,6 @@ class PetDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pet_detail)
-
         //set up toolbar
         setSupportActionBar(pet_detail_toolbar)
         pet_detail_toolbar.setNavigationOnClickListener { onBackPressed() }
@@ -73,16 +71,6 @@ class PetDetailActivity : AppCompatActivity() {
                 else -> it.setIcon(R.drawable.ic_outline_favorite_border_24px)
             }
         }
-        // set up share item
-        val shareItem = menu?.findItem(R.id.menu_share)
-        val mShareActionProvider = MenuItemCompat.getActionProvider(shareItem) as ShareActionProvider
-        val sendIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_SUBJECT, "subject")
-            putExtra(Intent.EXTRA_TEXT, "text")
-            type = "text/plain"
-        }
-        mShareActionProvider.setShareIntent(sendIntent)
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -90,6 +78,7 @@ class PetDetailActivity : AppCompatActivity() {
         return when (item?.itemId) {
             R.id.menu_favourite -> menuFavouriteSelected()
             R.id.menu_mail -> menuMailSelected()
+            R.id.menu_share -> menuShareSelected()
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -115,7 +104,29 @@ class PetDetailActivity : AppCompatActivity() {
 
 
     private fun menuMailSelected(): Boolean {
-        //TODO mail
+        val to = catInfo.email
+        val text = getString(R.string.email_text, catInfo.name)
+        val emailIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            data = Uri.parse("mailto:")
+            type = "text/plain"
+            putExtra(Intent.EXTRA_EMAIL, to)
+            putExtra(Intent.EXTRA_SUBJECT, catInfo.name)
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        startActivity(Intent.createChooser(emailIntent, getString(R.string.mail)))
+        return true
+    }
+
+    private fun menuShareSelected(): Boolean {
+        val text = getString(R.string.share_text, catInfo.name, getString(R.string.app_name), catInfo.photo)
+        val sendIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_SUBJECT, catInfo.name)
+            putExtra(Intent.EXTRA_TEXT, text)
+            type = "text/plain"
+        }
+        startActivity(Intent.createChooser(sendIntent, getString(R.string.share)))
         return true
     }
 

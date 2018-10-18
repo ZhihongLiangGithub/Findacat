@@ -13,20 +13,17 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import edu.gwu.zhihongliang.findacat.R
-import edu.gwu.zhihongliang.findacat.api.CatFactsApiEndpoint
-import edu.gwu.zhihongliang.findacat.model.schema.CatFactResponse
+import edu.gwu.zhihongliang.findacat.api.CatFactsFetcher
 import edu.gwu.zhihongliang.findacat.ui.fragment.FavouriteFragment
 import edu.gwu.zhihongliang.findacat.ui.fragment.FindFragment
 import edu.gwu.zhihongliang.findacat.util.ConnectivityUtil
 import edu.gwu.zhihongliang.findacat.util.NotifyUtil
 import kotlinx.android.synthetic.main.activity_main.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 class MainActivity : AppCompatActivity(),
-        BottomNavigationView.OnNavigationItemSelectedListener {
+        BottomNavigationView.OnNavigationItemSelectedListener,
+        CatFactsFetcher.onCompleteListener {
 
     private val TAG = "MainActivity"
     private var prevBottomNaviSelected = -1
@@ -79,13 +76,13 @@ class MainActivity : AppCompatActivity(),
         searchView.inputType = InputType.TYPE_CLASS_NUMBER
         searchView.isIconified = true
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String): Boolean {
+            override fun onQueryTextSubmit(query: String?): Boolean {
                 Log.i(TAG, query)
                 // get zip
                 val regex = """
                     \d{5}
                 """.trimIndent().toRegex()
-                val result = regex.find(query)
+                val result = regex.matchEntire(query ?: "")
                 if (!ConnectivityUtil.isConnected(this@MainActivity)) {
                     NotifyUtil.internetNotConnected(this@MainActivity)
                 } else if (result != null) {
@@ -107,7 +104,7 @@ class MainActivity : AppCompatActivity(),
                 return true
             }
 
-            override fun onQueryTextChange(s: String): Boolean {
+            override fun onQueryTextChange(s: String?): Boolean {
                 return true
             }
         })
@@ -116,40 +113,25 @@ class MainActivity : AppCompatActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.menu_cat_fact -> displayCatFact()
+            R.id.menu_cat_fact -> CatFactsFetcher.fetchData(this)
         }
         return super.onOptionsItemSelected(item)
     }
 
-
-    private fun displayCatFact() {
-        CatFactsApiEndpoint.apiEndPoint.getFact()
-                .enqueue(object : Callback<CatFactResponse> {
-                    override fun onFailure(call: Call<CatFactResponse>?, t: Throwable?) {
-                        Log.e(TAG, "Cat Fact Api failure!", t)
-                        if (!ConnectivityUtil.isConnected(this@MainActivity)) {
-                            NotifyUtil.internetNotConnected(this@MainActivity)
-                        } else {
-                            NotifyUtil.showToast(this@MainActivity, getString(R.string.cat_fact_failure))
-                        }
-                    }
-
-                    override fun onResponse(call: Call<CatFactResponse>, response: Response<CatFactResponse>) {
-                        val result = response.body()
-                        if (result != null) {
-                            // show cat fact
-                            AlertDialog.Builder(this@MainActivity)
-                                    .setTitle(R.string.cat_fact).setMessage(result.fact).show()
-                        } else {
-                            if (!ConnectivityUtil.isConnected(this@MainActivity)) {
-                                NotifyUtil.internetNotConnected(this@MainActivity)
-                            } else {
-                                NotifyUtil.showToast(this@MainActivity, getString(R.string.cat_fact_failure))
-                            }
-                        }
-                    }
-                })
+    override fun catFactSuccess(fact: String) {
+        AlertDialog.Builder(this)
+                .setTitle(R.string.cat_fact).setMessage(fact).show()
     }
+
+    override fun catFactFail() {
+        Log.e(TAG, "Cat Fact Api failure!")
+        if (!ConnectivityUtil.isConnected(this)) {
+            NotifyUtil.internetNotConnected(this)
+        } else {
+            NotifyUtil.showToast(this, getString(R.string.cat_fact_failure))
+        }
+    }
+
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item?.itemId) {

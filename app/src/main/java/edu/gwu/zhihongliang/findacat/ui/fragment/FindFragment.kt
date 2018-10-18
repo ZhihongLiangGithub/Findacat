@@ -10,10 +10,9 @@ import android.view.ViewGroup
 import com.google.android.gms.location.places.PlaceDetectionClient
 import com.google.android.gms.location.places.Places
 import com.google.android.gms.tasks.RuntimeExecutionException
-import edu.gwu.zhihongliang.findacat.Const
 import edu.gwu.zhihongliang.findacat.PersistenceManager
 import edu.gwu.zhihongliang.findacat.R
-import edu.gwu.zhihongliang.findacat.api.PetfinderApiEndpoint
+import edu.gwu.zhihongliang.findacat.api.PetfinderFetcher
 import edu.gwu.zhihongliang.findacat.model.CatInfo
 import edu.gwu.zhihongliang.findacat.model.schema.PetfinderResponse
 import edu.gwu.zhihongliang.findacat.ui.activity.MainActivity
@@ -21,12 +20,9 @@ import edu.gwu.zhihongliang.findacat.ui.activity.PetDetailActivity
 import edu.gwu.zhihongliang.findacat.ui.adapter.CatInfoItemAdapter
 import edu.gwu.zhihongliang.findacat.util.AddressUtil
 import kotlinx.android.synthetic.main.fragment_find.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
-class FindFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
+class FindFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener, PetfinderFetcher.onCompleteListener {
 
     private val TAG = "FindFragment"
     private lateinit var mPlaceDetectionClient: PlaceDetectionClient
@@ -60,7 +56,7 @@ class FindFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
         if (arguments != null) {
             var zip = arguments.getString(MainActivity.KEY_SEARCH_ZIP)
             if (zip != null) {
-                loadPetFindDataByZip(zip)
+                PetfinderFetcher.fetchData(zip, this)
             }
         } else {
             updateCatsByCurrentLocation()
@@ -89,12 +85,12 @@ class FindFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
                         false -> persistenceManager.saveZip(zip)
                     }
                     Log.i(TAG, "zip: $zip")
-                    loadPetFindDataByZip(zip)
+                    PetfinderFetcher.fetchData(zip, this)
                     result.release()
                 } else {
                     //get last zip
                     val zip = persistenceManager.getZip()
-                    loadPetFindDataByZip(zip)
+                    PetfinderFetcher.fetchData(zip, this)
                 }
             }
         } catch (e: RuntimeExecutionException) {
@@ -103,49 +99,29 @@ class FindFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
         }
     }
 
-
-    private fun loadPetFindDataByZip(zip: String) {
-        val params = hashMapOf(
-                "key" to Const.PETFINDER_API_KEY,
-                "format" to Const.PETFINDER_RESPONSE_FORMAT,
-                "animal" to "cat",
-                "location" to zip
-        )
-        PetfinderApiEndpoint.apiEndPoint.getPetFind(params).enqueue(object : Callback<PetfinderResponse> {
-            override fun onFailure(call: Call<PetfinderResponse>?, t: Throwable?) {
-                Log.e(TAG, "Petfinder Api failure!", t)
-                //TODO handle this
-                //turn off progress bar
-                if (progressBar != null) progressBar.visibility = View.INVISIBLE
-                //turn off refreshing circle
-                if (swipRefresh != null) swipRefresh.isRefreshing = false
+    override fun petfinderSuccess(petfinderResponse: PetfinderResponse) {
+        catInfoList = petfinderResponse.petfinder.pets.pet.map { CatInfo.adaptedFrom(it) } as MutableList
+        //set adapter for RecyclerView
+        if (!catInfoList.isEmpty()) {
+            if (catInfo_rv != null) {
+                catInfo_rv.adapter = CatInfoItemAdapter(catInfoList, activity, this)
             }
-
-            override fun onResponse(call: Call<PetfinderResponse>, response: Response<PetfinderResponse>) {
-                val body = response.body()
-                if (body != null) {
-                    catInfoList = body.petfinder.pets.pet.map { CatInfo.adaptedFrom(it) } as MutableList
-                    //set adapter for RecyclerView
-                    if (!catInfoList.isEmpty()) {
-                        if (catInfo_rv != null) {
-                            catInfo_rv.adapter = CatInfoItemAdapter(catInfoList, activity, this@FindFragment)
-                        }
-                    }
-                    //turn off progress bar
-                    if (progressBar != null) progressBar.visibility = View.INVISIBLE
-                    //turn off refreshing circle
-                    if (swipRefresh != null) swipRefresh.isRefreshing = false
-                } else {
-                    Log.e(TAG, "Petfinder Api failure!")
-                    //TODO handle this
-                    //turn off progress bar
-                    if (progressBar != null) progressBar.visibility = View.INVISIBLE
-                    //turn off refreshing circle
-                    if (swipRefresh != null) swipRefresh.isRefreshing = false
-                }
-            }
-        })
+        }
+        //turn off progress bar
+        if (progressBar != null) progressBar.visibility = View.INVISIBLE
+        //turn off refreshing circle
+        if (swipRefresh != null) swipRefresh.isRefreshing = false
     }
+
+    override fun petfinderFail() {
+        Log.e(TAG, "Petfinder Api failure!")
+        //TODO handle this
+        //turn off progress bar
+        if (progressBar != null) progressBar.visibility = View.INVISIBLE
+        //turn off refreshing circle
+        if (swipRefresh != null) swipRefresh.isRefreshing = false
+    }
+
 
     override fun onItemClick(catInfo: CatInfo, itemView: View) {
         val intent = PetDetailActivity.newIntent(activity, catInfo)
