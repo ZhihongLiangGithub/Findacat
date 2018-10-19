@@ -11,25 +11,26 @@ import android.view.View
 import android.view.ViewGroup
 import edu.gwu.zhihongliang.findacat.LocationDetector
 import edu.gwu.zhihongliang.findacat.R
-import edu.gwu.zhihongliang.findacat.api.Petfinder
+import edu.gwu.zhihongliang.findacat.api.PetfinderApi
 import edu.gwu.zhihongliang.findacat.model.CatInfo
-import edu.gwu.zhihongliang.findacat.model.schema.PetfinderResponse
+import edu.gwu.zhihongliang.findacat.model.schema.Pets
 import edu.gwu.zhihongliang.findacat.ui.activity.MainActivity
 import edu.gwu.zhihongliang.findacat.ui.activity.PetDetailActivity
 import edu.gwu.zhihongliang.findacat.ui.adapter.CatInfoItemAdapter
+import edu.gwu.zhihongliang.findacat.util.ConnectivityUtil
 import edu.gwu.zhihongliang.findacat.util.NotifyUtil
 import kotlinx.android.synthetic.main.fragment_find.*
 
 
 class FindFragment : Fragment(),
         CatInfoItemAdapter.OnItemClickListener,
-        Petfinder.OnCompleteListener,
+        PetfinderApi.OnCompleteListener,
         LocationDetector.OnGetCurrentLocationCompleteListener,
         LocationDetector.locationUpdateResultHandler {
 
     private val TAG = "FindFragment"
-    private val catInfoList = mutableListOf<CatInfo>()
-    private val petfinder = Petfinder(this)
+    private lateinit var catInfoList: MutableList<CatInfo>
+    private val petfinder = PetfinderApi(this)
     private lateinit var locationDetector: LocationDetector
 
 
@@ -80,8 +81,9 @@ class FindFragment : Fragment(),
         turnOffProgressWidget()
     }
 
-    override fun petfinderSuccess(petfinderResponse: PetfinderResponse) {
-        petfinderResponse.petfinder.pets.pet.forEach {
+    override fun petfinderSuccess(pets: Pets) {
+        catInfoList = mutableListOf()
+        pets.pet.forEach {
             CatInfo.adaptedFrom(it)?.let { catInfo -> catInfoList.add(catInfo) }
         }
         //set adapter for RecyclerView
@@ -93,9 +95,15 @@ class FindFragment : Fragment(),
         turnOffProgressWidget()
     }
 
-    override fun petfinderFail() {
+    override fun petfinderFail(message: String?) {
         Log.e(TAG, "Petfinder Api failure!")
-        //TODO handle this
+        if (message != null) {
+            NotifyUtil.showToast(context, message)
+        } else if (!ConnectivityUtil.isConnected(context)) {
+            NotifyUtil.internetNotConnected(context)
+        } else {
+            NotifyUtil.showToast(context, getString(R.string.petfinder_fail))
+        }
         turnOffProgressWidget()
     }
 

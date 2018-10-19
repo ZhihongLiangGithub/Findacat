@@ -27,10 +27,8 @@ data class CatInfo(
                 zip = petItem.contact.zip.t
                 email = petItem.contact.email.t
                 sex = if (petItem.sex.t == Sex.M.value) Sex.M else Sex.F
-                petItem.media?.let {
-                    photo = it.photos.photo.sortedBy {
-                        PhotoSize.valueOf(it.size.toUpperCase()).priority
-                    }[0].t
+                petItem.media.photos?.let {
+                    photo = it.photo.sortedBy { PhotoSize.valueOf(it.size.toUpperCase()).priority }[0].t
                 } ?: return null
             }
         }

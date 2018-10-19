@@ -14,7 +14,7 @@ import android.view.Menu
 import android.view.MenuItem
 import edu.gwu.zhihongliang.findacat.LocationDetector
 import edu.gwu.zhihongliang.findacat.R
-import edu.gwu.zhihongliang.findacat.api.CatFacts
+import edu.gwu.zhihongliang.findacat.api.CatFactsApi
 import edu.gwu.zhihongliang.findacat.ui.fragment.FavouriteFragment
 import edu.gwu.zhihongliang.findacat.ui.fragment.FindFragment
 import edu.gwu.zhihongliang.findacat.util.ConnectivityUtil
@@ -24,11 +24,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(),
         BottomNavigationView.OnNavigationItemSelectedListener,
-        CatFacts.OnCompleteListener {
+        CatFactsApi.OnCompleteListener {
 
     private val TAG = "MainActivity"
     private var prevBottomNaviSelected = -1
-    private val catFacts = CatFacts(this)
+    private val catFacts = CatFactsApi(this)
 
     companion object {
         val KEY_SEARCH_ZIP = "zip"

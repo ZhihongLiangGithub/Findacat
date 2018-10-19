@@ -4,13 +4,14 @@ import android.util.Log
 import edu.gwu.zhihongliang.findacat.Const
 import edu.gwu.zhihongliang.findacat.RetrofitManager
 import edu.gwu.zhihongliang.findacat.model.schema.PetfinderResponse
+import edu.gwu.zhihongliang.findacat.model.schema.Pets
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.QueryMap
 
-class Petfinder(private val onCompleteListener: OnCompleteListener) {
+class PetfinderApi(private val onCompleteListener: OnCompleteListener) {
 
     private val TAG = "Petfinder"
 
@@ -20,8 +21,8 @@ class Petfinder(private val onCompleteListener: OnCompleteListener) {
     }
 
     interface OnCompleteListener {
-        fun petfinderSuccess(petfinderResponse: PetfinderResponse)
-        fun petfinderFail()
+        fun petfinderSuccess(pets: Pets)
+        fun petfinderFail(message: String?)
     }
 
     fun getPetFindDataByZip(zip: String) {
@@ -35,13 +36,15 @@ class Petfinder(private val onCompleteListener: OnCompleteListener) {
         apiEndPoint.getPetFind(params).enqueue(object : Callback<PetfinderResponse> {
             override fun onFailure(call: Call<PetfinderResponse>?, t: Throwable?) {
                 Log.e(TAG, "Petfinder Api failure!", t)
-                onCompleteListener.petfinderFail()
+                onCompleteListener.petfinderFail(null)
             }
 
             override fun onResponse(call: Call<PetfinderResponse>?, response: Response<PetfinderResponse>?) {
-                response?.body()?.let {
-                    onCompleteListener.petfinderSuccess(it)
-                } ?: return onCompleteListener.petfinderFail()
+                response?.body()?.petfinder?.let {
+                    it.pets?.let { return onCompleteListener.petfinderSuccess(it) }
+                    // something goes wrong
+                    it.header.status.message.t.let { onCompleteListener.petfinderFail(it) }
+                } ?: onCompleteListener.petfinderFail(null)
             }
         })
     }

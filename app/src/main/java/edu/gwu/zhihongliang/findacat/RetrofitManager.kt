@@ -8,6 +8,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 class RetrofitManager {
     companion object {
+        @JvmStatic
         fun getCatFactsInstance(): Retrofit {
             return Retrofit.Builder()
                     .baseUrl(Const.CATFACTS_URL)
@@ -15,6 +16,7 @@ class RetrofitManager {
                     .build()
         }
 
+        @JvmStatic
         fun getPetfinderInstance(): Retrofit {
             return Retrofit.Builder()
                     .baseUrl(Const.PETFINDER_URL)
