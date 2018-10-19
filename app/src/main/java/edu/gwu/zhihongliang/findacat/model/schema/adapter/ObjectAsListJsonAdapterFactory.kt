@@ -15,7 +15,8 @@ class ObjectAsListJsonAdapterFactory : JsonAdapter.Factory {
         return ListJsonAdapter(listDelegate, objectDelegate)
     }
 
-    inner class ListJsonAdapter<T>(private val listDelegate: JsonAdapter<List<T>>, private val objectDelegate: JsonAdapter<T>) : JsonAdapter<List<T>>() {
+    inner class ListJsonAdapter<T>(private val listDelegate: JsonAdapter<List<T>>,
+                                   private val objectDelegate: JsonAdapter<T>) : JsonAdapter<List<T>>() {
 
         override fun fromJson(reader: JsonReader): List<T>? {
             if (reader.peek() == JsonReader.Token.BEGIN_OBJECT) {

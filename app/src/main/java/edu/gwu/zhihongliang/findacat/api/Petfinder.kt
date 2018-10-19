@@ -34,7 +34,7 @@ class Petfinder(private val onCompleteListener: OnCompleteListener) {
         )
         apiEndPoint.getPetFind(params).enqueue(object : Callback<PetfinderResponse> {
             override fun onFailure(call: Call<PetfinderResponse>?, t: Throwable?) {
-                Log.e(TAG, t?.message, t)
+                Log.e(TAG, "Petfinder Api failure!", t)
                 onCompleteListener.petfinderFail()
             }
 

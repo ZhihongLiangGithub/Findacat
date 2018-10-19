@@ -16,13 +16,15 @@ import kotlinx.android.synthetic.main.fragment_favourite.*
 
 class FavouriteFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
 
-    private val FAVOURITE_DETAIL_REQUEST = 1
     private lateinit var persistenceManager: PersistenceManager
-    private lateinit var catInfoList: MutableList<CatInfo>
+
+    lateinit var catInfoList: MutableList<CatInfo>
 
     companion object {
         @JvmStatic
         fun newInstance() = FavouriteFragment()
+
+        val FAVOURITE_DETAIL_REQUEST = 1
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +50,7 @@ class FavouriteFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
         catInfoList = persistenceManager.findAllFavouriteCats()
         if (!catInfoList.isEmpty()) {
             if (catInfo_rv != null) {
-                catInfo_rv.adapter = CatInfoItemAdapter(catInfoList, activity, this@FavouriteFragment)
+                catInfo_rv.adapter = CatInfoItemAdapter(catInfoList, activity, this)
             }
         }
         //turn off progress bar

@@ -1,5 +1,7 @@
 package edu.gwu.zhihongliang.findacat.ui.fragment
 
+import android.app.Activity
+import android.content.Intent
 import android.location.Address
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -8,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import edu.gwu.zhihongliang.findacat.LocationDetector
-import edu.gwu.zhihongliang.findacat.PersistenceManager
 import edu.gwu.zhihongliang.findacat.R
 import edu.gwu.zhihongliang.findacat.api.Petfinder
 import edu.gwu.zhihongliang.findacat.model.CatInfo
@@ -16,17 +17,18 @@ import edu.gwu.zhihongliang.findacat.model.schema.PetfinderResponse
 import edu.gwu.zhihongliang.findacat.ui.activity.MainActivity
 import edu.gwu.zhihongliang.findacat.ui.activity.PetDetailActivity
 import edu.gwu.zhihongliang.findacat.ui.adapter.CatInfoItemAdapter
+import edu.gwu.zhihongliang.findacat.util.NotifyUtil
 import kotlinx.android.synthetic.main.fragment_find.*
 
 
 class FindFragment : Fragment(),
         CatInfoItemAdapter.OnItemClickListener,
         Petfinder.OnCompleteListener,
-        LocationDetector.OnGetCurrentLocationCompleteListener {
+        LocationDetector.OnGetCurrentLocationCompleteListener,
+        LocationDetector.locationUpdateResultHandler {
 
     private val TAG = "FindFragment"
     private lateinit var catInfoList: MutableList<CatInfo>
-    private lateinit var persistenceManager: PersistenceManager
     private lateinit var petfinder: Petfinder
     private lateinit var locationDetector: LocationDetector
 
@@ -37,9 +39,9 @@ class FindFragment : Fragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        persistenceManager = PersistenceManager(activity)
         petfinder = Petfinder(this)
         locationDetector = LocationDetector(activity)
+        locationDetector.setLocationCallBackHandler(this)
     }
 
 
@@ -56,7 +58,7 @@ class FindFragment : Fragment(),
         progressBar.visibility = View.VISIBLE
         //update cats by search zip or by current location
         arguments?.getString(MainActivity.KEY_SEARCH_ZIP)?.let { petfinder.getPetFindDataByZip(it) }
-                ?: locationDetector.getCurrentLocation(this)
+                ?: locationDetector.createLocationRequest()
         //set up swipe refresh for RecyclerView
         swipRefresh.setOnRefreshListener {
             locationDetector.getCurrentLocation(this)
@@ -65,12 +67,13 @@ class FindFragment : Fragment(),
 
     override fun getCurrentLocationSuccess(address: Address) {
         val zip = address.postalCode
+                ?: return NotifyUtil.showToast(activity, getString(R.string.zip_unknown))
         Log.i(TAG, "current zip: $zip")
         petfinder.getPetFindDataByZip(zip)
     }
 
     override fun getCurrentLocationFail() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        Log.e(TAG, "get current location fail!")
     }
 
     override fun petfinderSuccess(petfinderResponse: PetfinderResponse) {
@@ -96,10 +99,34 @@ class FindFragment : Fragment(),
         if (swipRefresh != null) swipRefresh.isRefreshing = false
     }
 
+    override fun locationUpdateSuccess(address: Address) {
+        val zip = address.postalCode
+                ?: return NotifyUtil.showToast(activity, getString(R.string.zip_unknown))
+        Log.i(TAG, "location update current zip: $zip")
+        petfinder.getPetFindDataByZip(zip)
+    }
+
+    override fun locationUpdateFail() {
+        Log.e(TAG, "location update fail!")
+    }
 
     override fun onItemClick(catInfo: CatInfo, itemView: View) {
         val intent = PetDetailActivity.newIntent(activity, catInfo)
         startActivity(intent)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == LocationDetector.REQUEST_CHECK_SETTINGS) {
+            if (resultCode == Activity.RESULT_OK) {
+                locationDetector.startLocationUpdates()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        locationDetector.removeLocationUpdates()
+        super.onDestroy()
     }
 
 

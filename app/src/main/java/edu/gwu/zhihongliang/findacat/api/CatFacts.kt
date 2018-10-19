@@ -28,7 +28,7 @@ class CatFacts(private val onCompleteListener: OnCompleteListener) {
         apiEndPoint.getFact()
                 .enqueue(object : Callback<CatFactResponse> {
                     override fun onFailure(call: Call<CatFactResponse>?, t: Throwable?) {
-                        Log.e(TAG, t?.message, t)
+                        Log.e(TAG, "Cat Fact Api failure!", t)
                         onCompleteListener.catFactFail()
                     }
 
