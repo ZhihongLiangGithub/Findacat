@@ -28,11 +28,11 @@ class PetDetailActivity : AppCompatActivity() {
 
     companion object {
 
-        const val DATA = "data"
+        const val KEY_DATA = "data"
 
         fun newIntent(context: Context, catInfo: CatInfo): Intent {
             val intent = Intent(context, PetDetailActivity::class.java)
-            intent.putExtra(DATA, catInfo)
+            intent.putExtra(KEY_DATA, catInfo)
             return intent
         }
 
@@ -49,8 +49,8 @@ class PetDetailActivity : AppCompatActivity() {
         pet_detail_toolbar.setNavigationOnClickListener { onBackPressed() }
         this.title = ""
         //fill content
-        catInfo = intent.getParcelableExtra(DATA)
-        Picasso.with(this@PetDetailActivity).load(catInfo.photo).centerCrop().fit().into(imageView)
+        catInfo = intent.getParcelableExtra(KEY_DATA)
+        Picasso.with(this).load(catInfo.photo).centerCrop().fit().into(imageView)
         name_tv.text = getString(R.string.cat_name, catInfo.name)
         gender_tv.text = getString(R.string.cat_gender, catInfo.sex.value)
         breed_tv.text = getString(R.string.cat_breed, catInfo.breeds.joinToString())

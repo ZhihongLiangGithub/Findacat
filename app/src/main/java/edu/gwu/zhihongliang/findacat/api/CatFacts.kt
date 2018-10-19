@@ -33,8 +33,9 @@ class CatFacts(private val onCompleteListener: OnCompleteListener) {
                     }
 
                     override fun onResponse(call: Call<CatFactResponse>?, response: Response<CatFactResponse>?) {
-                        val fact = response?.body()?.fact ?: return onCompleteListener.catFactFail()
-                        onCompleteListener.catFactSuccess(fact)
+                        response?.body()?.fact?.let {
+                            onCompleteListener.catFactSuccess(it)
+                        } ?: return onCompleteListener.catFactFail()
                     }
                 })
     }

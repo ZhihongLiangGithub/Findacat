@@ -17,8 +17,7 @@ import kotlinx.android.synthetic.main.fragment_favourite.*
 class FavouriteFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
 
     private lateinit var persistenceManager: PersistenceManager
-
-    lateinit var catInfoList: MutableList<CatInfo>
+    private lateinit var catInfoList: MutableList<CatInfo>
 
     companion object {
         @JvmStatic
@@ -30,6 +29,7 @@ class FavouriteFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         persistenceManager = PersistenceManager(activity)
+        catInfoList = persistenceManager.findAllFavouriteCats()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -43,18 +43,14 @@ class FavouriteFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
         //turn on progress bar
         progressBar.visibility = View.VISIBLE
         displayFavouriteCat()
-
     }
 
     private fun displayFavouriteCat() {
-        catInfoList = persistenceManager.findAllFavouriteCats()
-        if (!catInfoList.isEmpty()) {
-            if (catInfo_rv != null) {
-                catInfo_rv.adapter = CatInfoItemAdapter(catInfoList, activity, this)
-            }
+        if (catInfoList.isNotEmpty()) {
+            catInfo_rv?.apply { adapter = CatInfoItemAdapter(catInfoList, activity, this@FavouriteFragment) }
         }
         //turn off progress bar
-        progressBar.visibility = View.INVISIBLE
+        progressBar?.apply { visibility = View.INVISIBLE }
     }
 
     override fun onItemClick(catInfo: CatInfo, itemView: View) {
@@ -66,10 +62,9 @@ class FavouriteFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
         if (requestCode == FAVOURITE_DETAIL_REQUEST) {
             if (resultCode == PetDetailActivity.RESULT_NOT_FAVOURITE) {
                 // if unfavourite a cat in PetDetailActivity, remove it from the list
-                val id = data?.getStringExtra(PetDetailActivity.KEY_ID)
-                catInfoList.removeIf { it.id == id }
-                if (catInfo_rv != null) {
-                    catInfo_rv.adapter.notifyDataSetChanged()
+                data?.getStringExtra(PetDetailActivity.KEY_ID)?.let { id ->
+                    catInfoList.removeIf { catInfo -> catInfo.id == id }
+                    catInfo_rv?.apply { adapter.notifyDataSetChanged() }
                 }
             }
         }

@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity(),
 
     private val TAG = "MainActivity"
     private var prevBottomNaviSelected = -1
-    private lateinit var catFacts: CatFacts
+    private val catFacts = CatFacts(this)
 
     companion object {
         val KEY_SEARCH_ZIP = "zip"
@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        catFacts = CatFacts(this)
         //set up toolbar
         setSupportActionBar(main_toolbar)
         this.setTitle(R.string.app_name)
@@ -75,43 +74,41 @@ class MainActivity : AppCompatActivity(),
         // set up search zip
         val searchZip = menu?.findItem(R.id.menu_search_zip)
         val searchView = searchZip?.actionView as SearchView
-        searchView.queryHint = getString(R.string.enter_zip)
-        searchView.inputType = InputType.TYPE_CLASS_NUMBER
-        searchView.isIconified = true
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                Log.i(TAG, query)
-                // get zip
-                val regex = """
-                    \d{5}
-                """.trimIndent().toRegex()
-                val result = regex.matchEntire(query ?: "")
-                if (!ConnectivityUtil.isConnected(this@MainActivity)) {
-                    NotifyUtil.internetNotConnected(this@MainActivity)
-                } else if (result != null) {
-                    val zip = result.value
-                    Log.i(TAG, "zip: $zip")
-                    prevBottomNaviSelected = R.id.navi_home
-                    bottomNavigationView.selectedItemId = R.id.navi_home
-                    // open FindFragment
-                    val fragment = FindFragment.newInstance().apply {
-                        arguments = Bundle().apply {
-                            putString(KEY_SEARCH_ZIP, zip)
+        searchView.apply {
+            queryHint = getString(R.string.enter_zip)
+            inputType = InputType.TYPE_CLASS_NUMBER
+            isIconified = true
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    Log.i(TAG, query)
+                    // get zip
+                    val regex = "\\d{5}".toRegex()
+                    val result = regex.matchEntire(query ?: "")
+                    if (!ConnectivityUtil.isConnected(context)) {
+                        NotifyUtil.internetNotConnected(context)
+                    } else if (result != null) {
+                        val zip = result.value
+                        Log.i(TAG, "search zip: $zip")
+                        prevBottomNaviSelected = R.id.navi_home
+                        bottomNavigationView.selectedItemId = R.id.navi_home
+                        // open FindFragment with argument
+                        val fragment = FindFragment.newInstance().apply {
+                            arguments = Bundle().apply { putString(KEY_SEARCH_ZIP, zip) }
                         }
+                        supportFragmentManager.beginTransaction().replace(R.id.container, fragment).commit()
+                        searchView.isIconified = true
+                        searchZip.collapseActionView()
+                    } else {
+                        NotifyUtil.showToast(context, getString(R.string.zip_invalid))
                     }
-                    supportFragmentManager.beginTransaction().replace(R.id.container, fragment).commit()
-                    searchView.isIconified = true
-                    searchZip.collapseActionView()
-                } else {
-                    NotifyUtil.showToast(this@MainActivity, getString(R.string.zip_invalid))
+                    return true
                 }
-                return true
-            }
 
-            override fun onQueryTextChange(s: String?): Boolean {
-                return true
-            }
-        })
+                override fun onQueryTextChange(s: String?): Boolean {
+                    return true
+                }
+            })
+        }
         return super.onCreateOptionsMenu(menu)
     }
 

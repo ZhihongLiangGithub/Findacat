@@ -28,9 +28,10 @@ class FindFragment : Fragment(),
         LocationDetector.locationUpdateResultHandler {
 
     private val TAG = "FindFragment"
-    private lateinit var catInfoList: MutableList<CatInfo>
-    private lateinit var petfinder: Petfinder
+    private val catInfoList = mutableListOf<CatInfo>()
+    private val petfinder = Petfinder(this)
     private lateinit var locationDetector: LocationDetector
+
 
     companion object {
         @JvmStatic
@@ -39,18 +40,15 @@ class FindFragment : Fragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        petfinder = Petfinder(this)
         locationDetector = LocationDetector(activity)
         locationDetector.setLocationCallBackHandler(this)
     }
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_find, container, false)
     }
-
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -66,48 +64,56 @@ class FindFragment : Fragment(),
     }
 
     override fun getCurrentLocationSuccess(address: Address) {
-        val zip = address.postalCode
-                ?: return NotifyUtil.showToast(activity, getString(R.string.zip_unknown))
-        Log.i(TAG, "current zip: $zip")
-        petfinder.getPetFindDataByZip(zip)
+        address.postalCode?.let {
+            Log.i(TAG, "current zip: $it")
+            petfinder.getPetFindDataByZip(it)
+        } ?: run {
+            // postal code can be null
+            NotifyUtil.showToast(context, getString(R.string.zip_unknown))
+            getCurrentLocationFail()
+        }
     }
 
     override fun getCurrentLocationFail() {
         Log.e(TAG, "get current location fail!")
+        //TODO handle this
+        turnOffProgressWidget()
     }
 
     override fun petfinderSuccess(petfinderResponse: PetfinderResponse) {
-        catInfoList = petfinderResponse.petfinder.pets.pet.map { CatInfo.adaptedFrom(it) } as MutableList
-        //set adapter for RecyclerView
-        if (!catInfoList.isEmpty()) {
-            if (catInfo_rv != null) {
-                catInfo_rv.adapter = CatInfoItemAdapter(catInfoList, activity, this)
-            }
+        petfinderResponse.petfinder.pets.pet.forEach {
+            CatInfo.adaptedFrom(it)?.let { catInfo -> catInfoList.add(catInfo) }
         }
-        //turn off progress bar
-        if (progressBar != null) progressBar.visibility = View.INVISIBLE
-        //turn off refreshing circle
-        if (swipRefresh != null) swipRefresh.isRefreshing = false
+        //set adapter for RecyclerView
+        if (catInfoList.isNotEmpty()) {
+            catInfo_rv?.apply { adapter = CatInfoItemAdapter(catInfoList, activity, this@FindFragment) }
+        } else {
+            NotifyUtil.showToast(context, getString(R.string.no_cat_data_found))
+        }
+        turnOffProgressWidget()
     }
 
     override fun petfinderFail() {
         Log.e(TAG, "Petfinder Api failure!")
         //TODO handle this
-        //turn off progress bar
-        if (progressBar != null) progressBar.visibility = View.INVISIBLE
-        //turn off refreshing circle
-        if (swipRefresh != null) swipRefresh.isRefreshing = false
+        turnOffProgressWidget()
     }
 
     override fun locationUpdateSuccess(address: Address) {
-        val zip = address.postalCode
-                ?: return NotifyUtil.showToast(activity, getString(R.string.zip_unknown))
-        Log.i(TAG, "location update current zip: $zip")
-        petfinder.getPetFindDataByZip(zip)
+        address.postalCode?.let {
+            Log.i(TAG, "location update current zip: $it")
+            petfinder.getPetFindDataByZip(it)
+        } ?: run {
+            // postal code can be null
+            NotifyUtil.showToast(context, getString(R.string.zip_unknown))
+            locationUpdateFail()
+        }
     }
 
     override fun locationUpdateFail() {
         Log.e(TAG, "location update fail!")
+        //TODO handle this
+        turnOffProgressWidget()
     }
 
     override fun onItemClick(catInfo: CatInfo, itemView: View) {
@@ -116,7 +122,6 @@ class FindFragment : Fragment(),
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == LocationDetector.REQUEST_CHECK_SETTINGS) {
             if (resultCode == Activity.RESULT_OK) {
                 locationDetector.startLocationUpdates()
@@ -124,10 +129,16 @@ class FindFragment : Fragment(),
         }
     }
 
+    private fun turnOffProgressWidget() {
+        //turn off progress bar
+        progressBar?.apply { visibility = View.INVISIBLE }
+        //turn off refreshing circle
+        swipRefresh?.apply { isRefreshing = false }
+    }
+
     override fun onDestroy() {
         locationDetector.removeLocationUpdates()
         super.onDestroy()
     }
-
 
 }

@@ -3,7 +3,6 @@ package edu.gwu.zhihongliang.findacat
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.util.Log
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -16,8 +15,6 @@ class PersistenceManager(private val context: Context) {
     private val TAG = "PersistenceManager"
 
     private val KEY_FAVOURITE = "favourite"
-    private val KEY_ZIP = "zip"
-    private val ZIP_DEFAULT = "22202"
 
 
     private val sharedPreferences: SharedPreferences by lazy {
@@ -45,15 +42,4 @@ class PersistenceManager(private val context: Context) {
         sharedPreferences.edit().putString(KEY_FAVOURITE, json).apply()
     }
 
-    fun saveZip(zip: String) {
-        sharedPreferences.edit().putString(KEY_ZIP, zip).apply()
-    }
-
-    fun getZip(): String {
-        var zip = sharedPreferences.getString(KEY_ZIP, "")
-        return if (zip.isEmpty()) {
-            Log.e(TAG, "unable to get last zip, return default: $ZIP_DEFAULT")
-            return ZIP_DEFAULT
-        } else zip
-    }
 }

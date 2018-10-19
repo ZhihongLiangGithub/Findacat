@@ -17,22 +17,22 @@ data class CatInfo(
 ) : Parcelable {
 
     companion object {
-        fun adaptedFrom(petItem: PetItem): CatInfo {
-            val catInfo = CatInfo()
-            catInfo.id = petItem.id.t
-            catInfo.name = petItem.name.t
-            catInfo.description = petItem.description.t
-            catInfo.breeds.addAll(petItem.breeds.breed.map { it.t })
-            catInfo.zip = petItem.contact.zip.t
-            catInfo.email = petItem.contact.email.t
-            catInfo.sex = if (petItem.sex.t == Sex.M.value) Sex.M else Sex.F
-            catInfo.photo = petItem.media.photos.photo.find { it.size == PhotoSize.X.value }?.t
-                    ?: petItem.media.photos.photo.find { it.size == PhotoSize.PN.value }?.t
-                    ?: petItem.media.photos.photo.find { it.size == PhotoSize.FPM.value }?.t
-                    ?: petItem.media.photos.photo.find { it.size == PhotoSize.PNT.value }?.t
-                    ?: petItem.media.photos.photo.find { it.size == PhotoSize.T.value }?.t
-                    ?: petItem.media.photos.photo[0].t
-            return catInfo
+        @JvmStatic
+        fun adaptedFrom(petItem: PetItem): CatInfo? {
+            return CatInfo().apply {
+                id = petItem.id.t
+                name = petItem.name.t
+                description = petItem.description?.t ?: return null
+                breeds.addAll(petItem.breeds.breed.map { it.t })
+                zip = petItem.contact.zip.t
+                email = petItem.contact.email.t
+                sex = if (petItem.sex.t == Sex.M.value) Sex.M else Sex.F
+                petItem.media?.let {
+                    photo = it.photos.photo.sortedBy {
+                        PhotoSize.valueOf(it.size.toUpperCase()).priority
+                    }[0].t
+                } ?: return null
+            }
         }
     }
 
@@ -41,7 +41,11 @@ data class CatInfo(
         M("M"), F("F")
     }
 
-    enum class PhotoSize(val value: String) {
-        PNT("pnt"), FPM("fpm"), X("x"), PN("pn"), T("t")
+    enum class PhotoSize(val value: String, val priority: Int) {
+        X("x", 1),
+        PN("pn", 2),
+        FPM("fpm", 3),
+        PNT("pnt", 4),
+        T("t", 5)
     }
 }

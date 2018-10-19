@@ -73,8 +73,8 @@ class LocationDetector(private val activity: Activity) {
 
     fun createLocationRequest() {
         locationRequest = LocationRequest().apply {
-            interval = 20000
-            fastestInterval = 10000
+            interval = 30000
+            fastestInterval = 15000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
         val builder = LocationSettingsRequest.Builder()

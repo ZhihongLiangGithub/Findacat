@@ -39,9 +39,9 @@ class Petfinder(private val onCompleteListener: OnCompleteListener) {
             }
 
             override fun onResponse(call: Call<PetfinderResponse>?, response: Response<PetfinderResponse>?) {
-                val petfinderResponse = response?.body()
-                        ?: return onCompleteListener.petfinderFail()
-                onCompleteListener.petfinderSuccess(petfinderResponse)
+                response?.body()?.let {
+                    onCompleteListener.petfinderSuccess(it)
+                } ?: return onCompleteListener.petfinderFail()
             }
         })
     }
