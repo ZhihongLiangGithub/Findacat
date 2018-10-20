@@ -18,14 +18,13 @@ class RetrofitManager {
 
         @JvmStatic
         fun getPetfinderInstance(): Retrofit {
+            val moshi = Moshi.Builder()
+                    .add(KotlinJsonAdapterFactory())
+                    .add(ObjectAsListJsonAdapterFactory())
+                    .build()
             return Retrofit.Builder()
                     .baseUrl(Const.PETFINDER_URL)
-                    .addConverterFactory(
-                            MoshiConverterFactory.create(
-                                    Moshi.Builder()
-                                            .add(KotlinJsonAdapterFactory())
-                                            .add(ObjectAsListJsonAdapterFactory())
-                                            .build()))
+                    .addConverterFactory(MoshiConverterFactory.create(moshi))
                     .build()
         }
     }

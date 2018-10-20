@@ -21,9 +21,7 @@ class LocationDetector(private val activity: Activity) {
     private lateinit var locationCallback: LocationCallback
     private lateinit var locationRequest: LocationRequest
     private var locationUpdateState = false
-    private val mInterval: Long = 20000
-    private val mFastestInterval: Long = 10000
-    private val mExpireDuration: Long = 10000
+    private val expireDuration: Long = 10000
     private val expireHandler = Handler()
     private lateinit var expireRunnable: Runnable
     private var lastAddress: Address? = null
@@ -33,38 +31,9 @@ class LocationDetector(private val activity: Activity) {
         const val REQUEST_CHECK_SETTINGS = 22
     }
 
-    interface OnGetCurrentLocationCompleteListener {
-        fun getCurrentLocationSuccess(address: Address)
-        fun getCurrentLocationFail()
-    }
-
     interface LocationUpdateResultHandler {
         fun locationUpdateSuccess(address: Address)
         fun locationUpdateFail()
-    }
-
-    fun getCurrentLocation(listener: OnGetCurrentLocationCompleteListener) {
-        // request location permission
-        if (ActivityCompat.checkSelfPermission(activity,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity,
-                    arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-            return
-        }
-        val task = fusedLocationClient.lastLocation
-        task.addOnSuccessListener {
-            it?.let {
-                val address = geocoder.getFromLocation(it.latitude, it.longitude, 1)
-                if (address != null && address.isNotEmpty()) {
-                    lastAddress = address[0]
-                    listener.getCurrentLocationSuccess(address[0])
-                } else listener.getCurrentLocationFail()
-            } ?: listener.getCurrentLocationFail()
-        }
-        task.addOnFailureListener {
-            Log.e(TAG, it.message, it)
-            listener.getCurrentLocationFail()
-        }
     }
 
     fun startLocationUpdates() {
@@ -77,34 +46,45 @@ class LocationDetector(private val activity: Activity) {
             return
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
-        //expireHandler.postDelayed(expireRunnable, mExpireDuration)
+        expireHandler.postDelayed(expireRunnable, expireDuration)
     }
 
     fun createLocationRequest(handler: LocationUpdateResultHandler) {
         expireRunnable = Runnable {
             Log.e(TAG, "location request time out!")
+            fusedLocationClient.removeLocationUpdates(locationCallback)
             // fall back to last address if not null, otherwise fail
-            lastAddress?.let { handler.locationUpdateSuccess(it) } ?: handler.locationUpdateFail()
+            lastAddress?.let {
+                Log.e(TAG, "fall back to last address!")
+                handler.locationUpdateSuccess(it)
+            } ?: run {
+                Log.e(TAG, "no last address available!")
+                handler.locationUpdateFail()
+            }
         }
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult?) {
                 p0?.lastLocation?.let {
                     val address = geocoder.getFromLocation(it.latitude, it.longitude, 1)
+                    fusedLocationClient.removeLocationUpdates(locationCallback)
+                    expireHandler.removeCallbacks(expireRunnable)
                     if (address != null && address.isNotEmpty()) {
+                        Log.i(TAG, "receive new address!")
                         lastAddress = address[0]
-                        //expireHandler.removeCallbacks(expireRunnable)
                         handler.locationUpdateSuccess(address[0])
-                    } else handler.locationUpdateFail()
+                    } else {
+                        // address is null or empty
+                        Log.e(TAG, "address is empty!")
+                        handler.locationUpdateFail()
+                    }
                 }
             }
         }
 
         locationRequest = LocationRequest().apply {
-            interval = 20000
-            fastestInterval = 10000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            //setExpirationDuration(2000)
+            setExpirationDuration(expireDuration)
         }
         val builder = LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest)
@@ -130,9 +110,4 @@ class LocationDetector(private val activity: Activity) {
             }
         }
     }
-
-    fun removeLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
-
 }

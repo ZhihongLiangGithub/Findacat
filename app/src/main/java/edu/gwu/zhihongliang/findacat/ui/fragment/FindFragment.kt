@@ -25,11 +25,10 @@ import kotlinx.android.synthetic.main.fragment_find.*
 class FindFragment : Fragment(),
         CatInfoItemAdapter.OnItemClickListener,
         PetfinderApi.OnCompleteListener,
-        LocationDetector.OnGetCurrentLocationCompleteListener,
         LocationDetector.LocationUpdateResultHandler {
 
     private val TAG = "FindFragment"
-    private lateinit var catInfoList: MutableList<CatInfo>
+    private val catInfoList: MutableList<CatInfo> = mutableListOf()
     private val petfinder = PetfinderApi(this)
     private lateinit var locationDetector: LocationDetector
 
@@ -59,35 +58,20 @@ class FindFragment : Fragment(),
                 ?: locationDetector.createLocationRequest(this)
         //set up swipe refresh for RecyclerView
         swipRefresh.setOnRefreshListener {
-            locationDetector.getCurrentLocation(this)
+            locationDetector.createLocationRequest(this)
         }
-    }
-
-    override fun getCurrentLocationSuccess(address: Address) {
-        address.postalCode?.let {
-            Log.i(TAG, "current zip: $it")
-            petfinder.getPetFindDataByZip(it)
-        } ?: run {
-            // postal code can be null
-            NotifyUtil.showToast(context, getString(R.string.zip_unknown))
-            getCurrentLocationFail()
-        }
-    }
-
-    override fun getCurrentLocationFail() {
-        Log.e(TAG, "get current location fail!")
-        //TODO handle this
-        turnOffProgressWidget()
+        // set adapter for recycler view
+        catInfo_rv.adapter = CatInfoItemAdapter(catInfoList, activity, this)
     }
 
     override fun petfinderSuccess(pets: Pets) {
-        catInfoList = mutableListOf()
+        catInfoList.removeAll { true }
         pets.pet.forEach {
             CatInfo.adaptedFrom(it)?.let { catInfo -> catInfoList.add(catInfo) }
         }
         //set adapter for RecyclerView
         if (catInfoList.isNotEmpty()) {
-            catInfo_rv?.apply { adapter = CatInfoItemAdapter(catInfoList, activity, this@FindFragment) }
+            catInfo_rv?.adapter?.notifyDataSetChanged()
         } else {
             NotifyUtil.showToast(context, getString(R.string.no_cat_data_found))
         }
@@ -108,7 +92,7 @@ class FindFragment : Fragment(),
 
     override fun locationUpdateSuccess(address: Address) {
         address.postalCode?.let {
-            Log.i(TAG, "location update current zip: $it")
+            Log.i(TAG, "current zip: $it")
             petfinder.getPetFindDataByZip(it)
         } ?: run {
             // postal code can be null
@@ -143,9 +127,5 @@ class FindFragment : Fragment(),
         swipRefresh?.apply { isRefreshing = false }
     }
 
-    override fun onDestroy() {
-        locationDetector.removeLocationUpdates()
-        super.onDestroy()
-    }
 
 }
