@@ -4,4 +4,5 @@
     <dimen name="default_margin">8dp</dimen>
     <dimen name="item_image_height">140dp</dimen>
     <dimen name="default_elevation">4dp</dimen>
+    <dimen name="cat_detail_textSize">15sp</dimen>
 </resources>

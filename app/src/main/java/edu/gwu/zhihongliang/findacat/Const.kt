@@ -6,7 +6,7 @@ object Const {
     const val PETFINDER_API_KEY = "b93c0a99c51866c16cc8e333eaa14af0"
     const val PETFINDER_RESPONSE_FORMAT = "json"
     const val LIST_IMAGE_SIZE = 500
-    const val DETAIL_IMAGE_SIZE = 800
+    const val DETAIL_IMAGE_SIZE = 1000
 
     val photoSizePriority = hashMapOf(
             "x" to 1,

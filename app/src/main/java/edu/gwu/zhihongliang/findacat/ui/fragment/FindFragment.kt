@@ -69,6 +69,7 @@ class FindFragment : Fragment(),
         // set adapter for RecyclerView
         if (catInfoList.isNotEmpty()) {
             Log.i(TAG, "loading ${catInfoList.size} pets")
+            catInfoList.shuffle()
             catInfo_rv?.adapter?.notifyDataSetChanged()
         } else {
             NotifyUtil.showToast(context, getString(R.string.no_cat_data_found))

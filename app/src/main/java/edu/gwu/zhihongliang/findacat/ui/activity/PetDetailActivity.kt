@@ -17,7 +17,6 @@ import kotlinx.android.synthetic.main.activity_pet_detail.*
 
 class PetDetailActivity : AppCompatActivity() {
 
-    private val TAG = "PetDetailActivity"
     private lateinit var catInfo: CatInfo
     private var isFavourite = true
     private val persistenceManager: PersistenceManager by lazy {
@@ -45,11 +44,11 @@ class PetDetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pet_detail)
-        //set up toolbar
+        // set up toolbar
         setSupportActionBar(pet_detail_toolbar)
         pet_detail_toolbar.setNavigationOnClickListener { onBackPressed() }
         this.title = ""
-        //fill content
+        // fill content
         catInfo = intent.getParcelableExtra(KEY_DATA)
         Picasso.with(this).load(catInfo.photo).resize(Const.DETAIL_IMAGE_SIZE, Const.DETAIL_IMAGE_SIZE).centerInside().into(imageView)
         name_tv.text = getString(R.string.cat_name, catInfo.name)
@@ -57,14 +56,14 @@ class PetDetailActivity : AppCompatActivity() {
         breed_tv.text = getString(R.string.cat_breed, catInfo.breeds.joinToString())
         zip_tv.text = getString(R.string.cat_zip, catInfo.zip)
         description_tv.text = catInfo.description
-        //check if this cat is favourite
+        // check if this cat is favourite
         isFavourite = favouriteCats.any { it.id == catInfo.id }
     }
 
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_pet_detail, menu)
-        //init the icon of favourite
+        // init the icon of favourite
         val item = menu?.findItem(R.id.menu_favourite)
         item?.let {
             when (isFavourite) {
@@ -89,14 +88,14 @@ class PetDetailActivity : AppCompatActivity() {
         val item = pet_detail_toolbar.menu.findItem(R.id.menu_favourite)
         when (isFavourite) {
             true -> {
-                //change icon
+                // change icon
                 item.setIcon(R.drawable.ic_outline_favorite_24px)
-                //add a favourite cat
+                // add a favourite cat
                 if (!favouriteCats.contains(catInfo)) favouriteCats.add(catInfo)
             }
             else -> {
                 item.setIcon(R.drawable.ic_outline_favorite_border_24px)
-                //remove a favourite cat
+                // remove a favourite cat
                 favouriteCats.remove(catInfo)
             }
         }
@@ -132,7 +131,7 @@ class PetDetailActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        //save sharePreference
+        // save sharePreference
         persistenceManager.saveFavouriteCats(favouriteCats)
         if (!isFavourite) {
             val returnIntent = Intent()

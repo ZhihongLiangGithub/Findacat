@@ -37,15 +37,15 @@ class MainActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        //set up toolbar
+        // set up toolbar
         setSupportActionBar(main_toolbar)
         this.setTitle(R.string.app_name)
-        //set up bottom navigation
+        // set up bottom navigation
         bottomNavigationView.setOnNavigationItemSelectedListener(this)
-        //check permission
+        // check permission
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            //request permission
+            // request permission
             ActivityCompat.requestPermissions(this,
                     arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LocationDetector.LOCATION_PERMISSION_REQUEST_CODE)
         } else {
@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity(),
                     prevBottomNaviSelected = -1
                     bottomNavigationView.selectedItemId = R.id.navi_home
                 } else {
-                    //permission denied
+                    // permission denied
                     finish()
                 }
             }

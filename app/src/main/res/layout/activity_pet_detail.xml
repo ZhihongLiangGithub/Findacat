@@ -34,13 +34,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <ImageView
-                    android:id="@+id/imageView"
+                <android.support.v7.widget.CardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
                     android:layout_centerHorizontal="true"
-                    tools:src="@mipmap/ic_launcher" />
+                    android:foreground="?android:attr/selectableItemBackground"
+                    app:cardBackgroundColor="@color/cardview_light_background"
+                    app:cardCornerRadius="@dimen/cardview_default_radius"
+                    app:cardElevation="@dimen/cardview_default_elevation">
+
+                    <ImageView
+                        android:id="@+id/imageView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:src="@mipmap/ic_launcher" />
+                </android.support.v7.widget.CardView>
+
             </RelativeLayout>
 
             <TextView
@@ -48,35 +58,39 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_margin"
-                android:text="@string/cat_name" />
+                android:text="@string/cat_name"
+                android:textSize="@dimen/cat_detail_textSize" />
 
             <TextView
                 android:id="@+id/breed_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_margin"
-                android:text="@string/cat_breed" />
+                android:text="@string/cat_breed"
+                android:textSize="@dimen/cat_detail_textSize" />
 
             <TextView
                 android:id="@+id/gender_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_margin"
-                android:text="@string/cat_gender" />
+                android:text="@string/cat_gender"
+                android:textSize="@dimen/cat_detail_textSize" />
 
             <TextView
                 android:id="@+id/zip_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_margin"
-                android:text="@string/cat_zip" />
+                android:text="@string/cat_zip"
+                android:textSize="@dimen/cat_detail_textSize" />
 
             <TextView
                 android:id="@+id/description_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/default_margin"
-                android:text="@string/description_placeholder" />
+                android:textSize="@dimen/cat_detail_textSize" />
 
         </LinearLayout>
     </ScrollView>

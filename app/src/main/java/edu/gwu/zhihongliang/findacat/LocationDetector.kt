@@ -44,6 +44,7 @@ class LocationDetector(private val activity: Activity) {
             return
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        // set up expire timer
         expireHandler.postDelayed(expireRunnable, expireDuration)
     }
 
@@ -62,10 +63,10 @@ class LocationDetector(private val activity: Activity) {
 
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult?) {
+                fusedLocationClient.removeLocationUpdates(locationCallback)
+                expireHandler.removeCallbacks(expireRunnable)
                 p0?.lastLocation?.let {
                     val address = geocoder.getFromLocation(it.latitude, it.longitude, 1)
-                    fusedLocationClient.removeLocationUpdates(locationCallback)
-                    expireHandler.removeCallbacks(expireRunnable)
                     if (address != null && address.isNotEmpty()) {
                         Log.i(TAG, "receive new address!")
                         lastAddress = address[0]
