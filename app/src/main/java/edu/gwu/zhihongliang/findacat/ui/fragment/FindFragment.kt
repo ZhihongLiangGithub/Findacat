@@ -97,7 +97,7 @@ class FindFragment : Fragment(),
         } ?: run {
             // postal code can be null
             NotifyUtil.showToast(context, getString(R.string.zip_unknown))
-            locationUpdateFail()
+            turnOffProgressWidget()
         }
     }
 
