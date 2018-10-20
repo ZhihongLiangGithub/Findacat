@@ -51,26 +51,24 @@ class FindFragment : Fragment(),
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //turn on progress bar
+        // turn on progress bar
         progressBar.visibility = View.VISIBLE
-        //update cats by search zip or by current location
+        // update cats by search zip or by current location
         arguments?.getString(MainActivity.KEY_SEARCH_ZIP)?.let { petfinder.getPetFindDataByZip(it) }
                 ?: locationDetector.createLocationRequest(this)
-        //set up swipe refresh for RecyclerView
-        swipRefresh.setOnRefreshListener {
-            locationDetector.createLocationRequest(this)
-        }
+        // set up swipe refresh for RecyclerView
+        swipRefresh.setOnRefreshListener { locationDetector.createLocationRequest(this) }
         // set adapter for recycler view
         catInfo_rv.adapter = CatInfoItemAdapter(catInfoList, activity, this)
     }
 
     override fun petfinderSuccess(pets: Pets) {
         catInfoList.removeAll { true }
-        pets.pet.forEach {
-            CatInfo.adaptedFrom(it)?.let { catInfo -> catInfoList.add(catInfo) }
-        }
-        //set adapter for RecyclerView
+        // adapt PetItem list to CatInfo list
+        pets.pet.forEach { CatInfo.adaptedFrom(it)?.let { catInfo -> catInfoList.add(catInfo) } }
+        // set adapter for RecyclerView
         if (catInfoList.isNotEmpty()) {
+            Log.i(TAG, "loading ${catInfoList.size} pets")
             catInfo_rv?.adapter?.notifyDataSetChanged()
         } else {
             NotifyUtil.showToast(context, getString(R.string.no_cat_data_found))
@@ -81,6 +79,7 @@ class FindFragment : Fragment(),
     override fun petfinderFail(message: String?) {
         Log.e(TAG, "Petfinder Api failure!")
         if (message != null) {
+            Log.e(TAG, message)
             NotifyUtil.showToast(context, message)
         } else if (!ConnectivityUtil.isConnected(context)) {
             NotifyUtil.internetNotConnected(context)
@@ -103,7 +102,7 @@ class FindFragment : Fragment(),
 
     override fun locationUpdateFail() {
         Log.e(TAG, "location update fail!")
-        //TODO handle this
+        NotifyUtil.showToast(context, getString(R.string.location_update_fail))
         turnOffProgressWidget()
     }
 
@@ -121,9 +120,9 @@ class FindFragment : Fragment(),
     }
 
     private fun turnOffProgressWidget() {
-        //turn off progress bar
+        // turn off progress bar
         progressBar?.apply { visibility = View.INVISIBLE }
-        //turn off refreshing circle
+        // turn off refreshing circle
         swipRefresh?.apply { isRefreshing = false }
     }
 

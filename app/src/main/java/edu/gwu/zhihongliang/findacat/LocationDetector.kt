@@ -15,12 +15,11 @@ class LocationDetector(private val activity: Activity) {
 
     private val TAG = "LocationDetector"
 
-    private val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity)
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
     private val geocoder = Geocoder(activity)
 
     private lateinit var locationCallback: LocationCallback
     private lateinit var locationRequest: LocationRequest
-    private var locationUpdateState = false
     private val expireDuration: Long = 10000
     private val expireHandler = Handler()
     private lateinit var expireRunnable: Runnable
@@ -37,7 +36,6 @@ class LocationDetector(private val activity: Activity) {
     }
 
     fun startLocationUpdates() {
-        locationUpdateState = true
         if (ActivityCompat.checkSelfPermission(activity,
                         android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity,
@@ -53,7 +51,6 @@ class LocationDetector(private val activity: Activity) {
         expireRunnable = Runnable {
             Log.e(TAG, "location request time out!")
             fusedLocationClient.removeLocationUpdates(locationCallback)
-            // fall back to last address if not null, otherwise fail
             lastAddress?.let {
                 Log.e(TAG, "fall back to last address!")
                 handler.locationUpdateSuccess(it)
@@ -78,7 +75,7 @@ class LocationDetector(private val activity: Activity) {
                         Log.e(TAG, "address is empty!")
                         handler.locationUpdateFail()
                     }
-                }
+                } ?: handler.locationUpdateFail()
             }
         }
 

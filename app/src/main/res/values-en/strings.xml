@@ -28,4 +28,5 @@
     <string name="email_text">Hi! I am interested in the cat named %s. Can I have more information about this cat?</string>
     <string name="no_cat_data_found">No cat data found!</string>
     <string name="petfinder_fail">petfinder fail</string>
+    <string name="location_update_fail">location update fail!</string>
 </resources>
