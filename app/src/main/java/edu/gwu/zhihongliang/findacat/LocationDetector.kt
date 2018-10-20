@@ -5,6 +5,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
+import android.os.Handler
 import android.support.v4.app.ActivityCompat
 import android.util.Log
 import com.google.android.gms.common.api.ResolvableApiException
@@ -20,6 +21,12 @@ class LocationDetector(private val activity: Activity) {
     private lateinit var locationCallback: LocationCallback
     private lateinit var locationRequest: LocationRequest
     private var locationUpdateState = false
+    private val mInterval: Long = 20000
+    private val mFastestInterval: Long = 10000
+    private val mExpireDuration: Long = 10000
+    private val expireHandler = Handler()
+    private lateinit var expireRunnable: Runnable
+    private var lastAddress: Address? = null
 
     companion object {
         const val LOCATION_PERMISSION_REQUEST_CODE = 11
@@ -31,7 +38,7 @@ class LocationDetector(private val activity: Activity) {
         fun getCurrentLocationFail()
     }
 
-    interface locationUpdateResultHandler {
+    interface LocationUpdateResultHandler {
         fun locationUpdateSuccess(address: Address)
         fun locationUpdateFail()
     }
@@ -49,6 +56,7 @@ class LocationDetector(private val activity: Activity) {
             it?.let {
                 val address = geocoder.getFromLocation(it.latitude, it.longitude, 1)
                 if (address != null && address.isNotEmpty()) {
+                    lastAddress = address[0]
                     listener.getCurrentLocationSuccess(address[0])
                 } else listener.getCurrentLocationFail()
             } ?: listener.getCurrentLocationFail()
@@ -69,13 +77,34 @@ class LocationDetector(private val activity: Activity) {
             return
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        //expireHandler.postDelayed(expireRunnable, mExpireDuration)
     }
 
-    fun createLocationRequest() {
+    fun createLocationRequest(handler: LocationUpdateResultHandler) {
+        expireRunnable = Runnable {
+            Log.e(TAG, "location request time out!")
+            // fall back to last address if not null, otherwise fail
+            lastAddress?.let { handler.locationUpdateSuccess(it) } ?: handler.locationUpdateFail()
+        }
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(p0: LocationResult?) {
+                p0?.lastLocation?.let {
+                    val address = geocoder.getFromLocation(it.latitude, it.longitude, 1)
+                    if (address != null && address.isNotEmpty()) {
+                        lastAddress = address[0]
+                        //expireHandler.removeCallbacks(expireRunnable)
+                        handler.locationUpdateSuccess(address[0])
+                    } else handler.locationUpdateFail()
+                }
+            }
+        }
+
         locationRequest = LocationRequest().apply {
-            interval = 30000
-            fastestInterval = 15000
+            interval = 20000
+            fastestInterval = 10000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            //setExpirationDuration(2000)
         }
         val builder = LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest)
@@ -97,19 +126,6 @@ class LocationDetector(private val activity: Activity) {
                             REQUEST_CHECK_SETTINGS)
                 } catch (sendEx: IntentSender.SendIntentException) {
                     // Ignore the error.
-                }
-            }
-        }
-    }
-
-    fun setLocationCallBackHandler(handler: locationUpdateResultHandler) {
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(p0: LocationResult?) {
-                p0?.lastLocation?.let {
-                    val address = geocoder.getFromLocation(it.latitude, it.longitude, 1)
-                    if (address != null && address.isNotEmpty()) {
-                        handler.locationUpdateSuccess(address[0])
-                    } else handler.locationUpdateFail()
                 }
             }
         }

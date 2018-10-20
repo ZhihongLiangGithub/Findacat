@@ -26,7 +26,7 @@ class FindFragment : Fragment(),
         CatInfoItemAdapter.OnItemClickListener,
         PetfinderApi.OnCompleteListener,
         LocationDetector.OnGetCurrentLocationCompleteListener,
-        LocationDetector.locationUpdateResultHandler {
+        LocationDetector.LocationUpdateResultHandler {
 
     private val TAG = "FindFragment"
     private lateinit var catInfoList: MutableList<CatInfo>
@@ -42,7 +42,6 @@ class FindFragment : Fragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locationDetector = LocationDetector(activity)
-        locationDetector.setLocationCallBackHandler(this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -57,7 +56,7 @@ class FindFragment : Fragment(),
         progressBar.visibility = View.VISIBLE
         //update cats by search zip or by current location
         arguments?.getString(MainActivity.KEY_SEARCH_ZIP)?.let { petfinder.getPetFindDataByZip(it) }
-                ?: locationDetector.createLocationRequest()
+                ?: locationDetector.createLocationRequest(this)
         //set up swipe refresh for RecyclerView
         swipRefresh.setOnRefreshListener {
             locationDetector.getCurrentLocation(this)

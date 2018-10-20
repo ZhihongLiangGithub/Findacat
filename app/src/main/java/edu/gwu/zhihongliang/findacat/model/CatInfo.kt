@@ -1,6 +1,7 @@
 package edu.gwu.zhihongliang.findacat.model
 
 import android.os.Parcelable
+import edu.gwu.zhihongliang.findacat.Const
 import edu.gwu.zhihongliang.findacat.model.schema.PetItem
 import kotlinx.android.parcel.Parcelize
 
@@ -8,7 +9,7 @@ import kotlinx.android.parcel.Parcelize
 data class CatInfo(
         var id: String = "",
         var name: String = "",
-        var sex: Sex = Sex.M,
+        var sex: String = "",
         val breeds: MutableList<String> = mutableListOf(),
         var zip: String = "",
         var description: String = "",
@@ -26,24 +27,11 @@ data class CatInfo(
                 breeds.addAll(petItem.breeds.breed.map { it.t })
                 zip = petItem.contact.zip.t
                 email = petItem.contact.email.t
-                sex = if (petItem.sex.t == Sex.M.value) Sex.M else Sex.F
+                sex = petItem.sex.t
                 petItem.media.photos?.let {
-                    photo = it.photo.sortedBy { PhotoSize.valueOf(it.size.toUpperCase()).priority }[0].t
+                    photo = it.photo.sortedBy { Const.photoSizePriority[it.size] }[0].t
                 } ?: return null
             }
         }
-    }
-
-
-    enum class Sex(val value: String) {
-        M("M"), F("F")
-    }
-
-    enum class PhotoSize(val value: String, val priority: Int) {
-        X("x", 1),
-        PN("pn", 2),
-        FPM("fpm", 3),
-        PNT("pnt", 4),
-        T("t", 5)
     }
 }

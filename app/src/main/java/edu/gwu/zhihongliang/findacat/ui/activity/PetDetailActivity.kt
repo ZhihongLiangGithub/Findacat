@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import com.squareup.picasso.Picasso
+import edu.gwu.zhihongliang.findacat.Const
 import edu.gwu.zhihongliang.findacat.PersistenceManager
 import edu.gwu.zhihongliang.findacat.R
 import edu.gwu.zhihongliang.findacat.model.CatInfo
@@ -50,9 +51,9 @@ class PetDetailActivity : AppCompatActivity() {
         this.title = ""
         //fill content
         catInfo = intent.getParcelableExtra(KEY_DATA)
-        Picasso.with(this).load(catInfo.photo).centerCrop().fit().into(imageView)
+        Picasso.with(this).load(catInfo.photo).resize(Const.DETAIL_IMAGE_SIZE, Const.DETAIL_IMAGE_SIZE).centerInside().into(imageView)
         name_tv.text = getString(R.string.cat_name, catInfo.name)
-        gender_tv.text = getString(R.string.cat_gender, catInfo.sex.value)
+        gender_tv.text = getString(R.string.cat_gender, catInfo.sex)
         breed_tv.text = getString(R.string.cat_breed, catInfo.breeds.joinToString())
         zip_tv.text = getString(R.string.cat_zip, catInfo.zip)
         description_tv.text = catInfo.description

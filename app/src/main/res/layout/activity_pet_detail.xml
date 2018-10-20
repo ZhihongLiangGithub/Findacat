@@ -19,24 +19,29 @@
         android:theme="?attr/actionBarTheme"
         app:navigationIcon="@drawable/ic_outline_arrow_back_24px" />
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/pet_detail_toolbar"
-        app:srcCompat="@android:drawable/sym_def_app_icon" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/imageView">
+        android:layout_below="@id/pet_detail_toolbar">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_margin"
             android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imageView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    tools:src="@mipmap/ic_launcher" />
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/name_tv"
