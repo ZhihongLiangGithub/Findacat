@@ -19,6 +19,7 @@ import edu.gwu.zhihongliang.findacat.ui.fragment.FavouriteFragment
 import edu.gwu.zhihongliang.findacat.ui.fragment.FindFragment
 import edu.gwu.zhihongliang.findacat.util.ConnectivityUtil
 import edu.gwu.zhihongliang.findacat.util.NotifyUtil
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity(),
