@@ -126,6 +126,4 @@ class FindFragment : Fragment(),
         // turn off refreshing circle
         swipRefresh?.apply { isRefreshing = false }
     }
-
-
 }

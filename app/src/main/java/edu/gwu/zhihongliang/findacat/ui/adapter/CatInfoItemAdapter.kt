@@ -28,9 +28,7 @@ class CatInfoItemAdapter(private val catInfoList: List<CatInfo>,
             val uri = catInfo.photo
             Picasso.with(context).load(uri).resize(Const.LIST_IMAGE_SIZE, Const.LIST_IMAGE_SIZE).centerCrop().into(cat_Image)
             cat_name.text = catInfo.name
-            setOnClickListener {
-                listener.onItemClick(catInfo, it)
-            }
+            setOnClickListener { listener.onItemClick(catInfo, it) }
         }
     }
 

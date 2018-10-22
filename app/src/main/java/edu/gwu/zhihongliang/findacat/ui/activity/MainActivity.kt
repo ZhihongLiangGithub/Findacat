@@ -19,7 +19,6 @@ import edu.gwu.zhihongliang.findacat.ui.fragment.FavouriteFragment
 import edu.gwu.zhihongliang.findacat.ui.fragment.FindFragment
 import edu.gwu.zhihongliang.findacat.util.ConnectivityUtil
 import edu.gwu.zhihongliang.findacat.util.NotifyUtil
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity(),
@@ -51,7 +50,6 @@ class MainActivity : AppCompatActivity(),
         } else {
             bottomNavigationView.selectedItemId = R.id.navi_home
         }
-
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
