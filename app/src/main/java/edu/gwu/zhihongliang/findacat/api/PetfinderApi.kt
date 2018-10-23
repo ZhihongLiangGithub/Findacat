@@ -40,10 +40,11 @@ class PetfinderApi(private val onCompleteListener: OnCompleteListener) {
             }
 
             override fun onResponse(call: Call<PetfinderResponse>?, response: Response<PetfinderResponse>?) {
-                response?.body()?.petfinder?.let {
-                    it.pets?.let { return onCompleteListener.petfinderSuccess(it) }
-                    // something goes wrong
-                    it.header.status.message.t.let { onCompleteListener.petfinderFail(it) }
+                response?.body()?.petfinder?.let { petfinder ->
+                    petfinder.pets?.let { onCompleteListener.petfinderSuccess(it) } ?: run {
+                        // something goes wrong
+                        petfinder.header.status.message.t.let { onCompleteListener.petfinderFail(it) }
+                    }
                 } ?: onCompleteListener.petfinderFail(null)
             }
         })
