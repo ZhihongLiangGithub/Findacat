@@ -6,5 +6,5 @@ import com.squareup.moshi.Json
  * Created by Liang on 2018/10/19
  */
 
-data class Status(@Json(name = "message") val message: Message,
+data class Status(@Json(name = "message") val message: StringWrapper,
                   @Json(name = "code") val code: StringWrapper)

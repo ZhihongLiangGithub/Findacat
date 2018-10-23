@@ -10,5 +10,5 @@ data class PetItem(
         @Json(name = "breeds") val breeds: Breeds,
         @Json(name = "name") val name: StringWrapper,
         @Json(name = "sex") val sex: StringWrapper,
-        @Json(name = "description") val description: StringWrapper?
+        @Json(name = "description") val description: StringWrapper
 )

@@ -21,13 +21,15 @@ data class CatInfo(
         @JvmStatic
         fun adaptedFrom(petItem: PetItem): CatInfo? {
             return CatInfo().apply {
-                id = petItem.id.t
-                name = petItem.name.t
+                id = petItem.id.t ?: return null
+                name = petItem.name.t ?: return null
                 description = petItem.description?.t ?: return null
-                breeds.addAll(petItem.breeds.breed.map { it.t })
-                zip = petItem.contact.zip.t
-                email = petItem.contact.email.t
-                sex = petItem.sex.t
+                petItem.breeds.breed.forEach {
+                    it.t?.let { breeds.add(it) } ?: return null
+                }
+                zip = petItem.contact.zip.t ?: return null
+                email = petItem.contact.email.t ?: return null
+                sex = petItem.sex.t ?: return null
                 petItem.media.photos?.let {
                     photo = it.photo.sortedBy { Const.photoSizePriority[it.size] }[0].t
                 } ?: return null

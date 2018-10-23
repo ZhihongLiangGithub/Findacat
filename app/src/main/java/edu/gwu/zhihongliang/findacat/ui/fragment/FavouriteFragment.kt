@@ -43,9 +43,7 @@ class FavouriteFragment : Fragment(), CatInfoItemAdapter.OnItemClickListener {
         //turn on progress bar
         progressBar.visibility = View.VISIBLE
         // display favourite cat
-        if (catInfoList.isNotEmpty()) {
-            catInfo_rv?.adapter = CatInfoItemAdapter(catInfoList, activity, this)
-        }
+        catInfo_rv?.adapter = CatInfoItemAdapter(catInfoList, activity, this)
         //turn off progress bar
         progressBar?.apply { visibility = View.INVISIBLE }
     }

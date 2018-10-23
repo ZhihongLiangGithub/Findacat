@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">找喵喵</string>
+    <string name="cat_fact">猫咪小知识</string>
+    <string name="cat_name">名称: %s</string>
+    <string name="cat_gender">性别: %s</string>
+    <string name="cat_breed">品种: %s</string>
+    <string name="cat_zip">邮编: %s</string>
+    <string name="share">分享</string>
+    <string name="favourite">最爱</string>
+    <string name="home">主页</string>
+    <string name="mail">邮件</string>
+    <string name="search_zip">邮编搜索</string>
+    <string name="enter_zip">输入邮编</string>
+    <string name="zip_unknown">无法获取当前邮编</string>
+    <string name="zip_invalid">邮编格式不正确</string>
+    <string name="no_internet">无网络连接</string>
+    <string name="cat_fact_failure">Cat Fact Api失败！</string>
+    <string name="share_text">嗨！我在%1$s上找到了一只叫%2$s的猫咪，快来看！%3$s</string>
+    <string name="email_text">嗨！我对%s这只猫咪很感兴趣。我能了解它的更多信息吗？</string>
+    <string name="no_cat_data_found">无猫咪数据</string>
+    <string name="petfinder_fail">Petfinder Api失败</string>
+    <string name="location_update_fail">位置更新失败！</string>
+</resources>

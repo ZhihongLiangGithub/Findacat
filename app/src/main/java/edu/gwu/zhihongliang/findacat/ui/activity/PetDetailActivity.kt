@@ -13,6 +13,7 @@ import edu.gwu.zhihongliang.findacat.PersistenceManager
 import edu.gwu.zhihongliang.findacat.R
 import edu.gwu.zhihongliang.findacat.model.CatInfo
 import kotlinx.android.synthetic.main.activity_pet_detail.*
+import java.util.*
 
 
 class PetDetailActivity : AppCompatActivity() {
@@ -119,7 +120,11 @@ class PetDetailActivity : AppCompatActivity() {
     }
 
     private fun menuShareSelected(): Boolean {
-        val text = getString(R.string.share_text, catInfo.name, getString(R.string.app_name), catInfo.photo)
+        val text = if (Locale.getDefault().language == Locale.CHINA.language) { // "zh"
+            getString(R.string.share_text, getString(R.string.app_name), catInfo.name, catInfo.photo)
+        } else {
+            getString(R.string.share_text, catInfo.name, getString(R.string.app_name), catInfo.photo)
+        }
         val sendIntent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_SUBJECT, catInfo.name)
