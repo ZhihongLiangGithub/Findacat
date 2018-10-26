@@ -23,7 +23,7 @@ data class CatInfo(
             return CatInfo().apply {
                 id = petItem.id.t ?: return null
                 name = petItem.name.t ?: return null
-                description = petItem.description?.t ?: return null
+                description = petItem.description.t ?: return null
                 petItem.breeds.breed.forEach {
                     it.t?.let { breeds.add(it) } ?: return null
                 }
