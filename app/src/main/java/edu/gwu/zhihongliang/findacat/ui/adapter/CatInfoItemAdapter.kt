@@ -2,10 +2,12 @@ package edu.gwu.zhihongliang.findacat.ui.adapter
 
 import android.content.Context
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import edu.gwu.zhihongliang.findacat.Const
 import edu.gwu.zhihongliang.findacat.R
@@ -23,10 +25,23 @@ class CatInfoItemAdapter(private val catInfoList: List<CatInfo>,
 
     private var lastPosition = -1
 
+    companion object {
+        const val TAG = "CatInfoItemAdapter"
+    }
+
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(catInfo: CatInfo, listener: OnItemClickListener) = with(itemView) {
-            val uri = catInfo.photo
-            Picasso.with(context).load(uri).resize(Const.LIST_IMAGE_SIZE, Const.LIST_IMAGE_SIZE).centerCrop().into(cat_Image)
+            // replace http with https
+            val uri = catInfo.photo.replaceFirst("http", "https", false)
+            Picasso.with(context).load(uri).resize(Const.LIST_IMAGE_SIZE, Const.LIST_IMAGE_SIZE)
+                    .centerCrop().into(cat_Image, object : Callback {
+                        override fun onSuccess() {
+                        }
+
+                        override fun onError() {
+                            Log.e(TAG, "image of ${catInfo.id} is not loaded! uri: ${catInfo.photo}")
+                        }
+                    })
             cat_name.text = catInfo.name
             setOnClickListener { listener.onItemClick(catInfo, it) }
         }
