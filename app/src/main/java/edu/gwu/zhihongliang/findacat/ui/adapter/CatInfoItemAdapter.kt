@@ -31,9 +31,7 @@ class CatInfoItemAdapter(private val catInfoList: List<CatInfo>,
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(catInfo: CatInfo, listener: OnItemClickListener) = with(itemView) {
-            // replace http with https
-            val uri = catInfo.photo.replaceFirst("http", "https", false)
-            Picasso.with(context).load(uri).resize(Const.LIST_IMAGE_SIZE, Const.LIST_IMAGE_SIZE)
+            Picasso.with(context).load(catInfo.photo).resize(Const.LIST_IMAGE_SIZE, Const.LIST_IMAGE_SIZE)
                     .centerCrop().into(cat_Image, object : Callback {
                         override fun onSuccess() {
                         }
