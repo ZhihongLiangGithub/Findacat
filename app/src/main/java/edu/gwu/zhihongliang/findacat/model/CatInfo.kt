@@ -31,7 +31,8 @@ data class CatInfo(
                 email = petItem.contact.email.t ?: return null
                 sex = petItem.sex.t ?: return null
                 petItem.media.photos?.let {
-                    photo = it.photo.sortedBy { Const.photoSizePriority[it.size] }[0].t.replaceFirst("http", "https", false)
+//                    photo = it.photo.sortedBy { Const.photoSizePriority[it.size] }[0].t.replaceFirst("http://", "https://", false)
+                    photo = it.photo.sortedBy { Const.photoSizePriority[it.size] }[0].t
                 } ?: return null
             }
         }
