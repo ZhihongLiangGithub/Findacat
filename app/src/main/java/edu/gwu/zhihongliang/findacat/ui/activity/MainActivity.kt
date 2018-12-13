@@ -21,9 +21,6 @@ import edu.gwu.zhihongliang.findacat.util.ConnectivityUtil
 import edu.gwu.zhihongliang.findacat.util.NotifyUtil
 import kotlinx.android.synthetic.main.activity_main.*
 import edu.gwu.zhihongliang.findacat.R.id.bottomNavigationView
-import edu.gwu.zhihongliang.findacat.R.id.bottomNavigationView
-
-
 
 
 
@@ -55,7 +52,9 @@ class MainActivity : AppCompatActivity(),
             ActivityCompat.requestPermissions(this,
                     arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), LocationDetector.LOCATION_PERMISSION_REQUEST_CODE)
         } else {
-            bottomNavigationView.selectedItemId = R.id.navi_home
+            if (currentSelectedBottomNavi == -1) {
+                bottomNavigationView.selectedItemId = R.id.navi_home
+            }
         }
     }
 
