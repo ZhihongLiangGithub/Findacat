@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.support.v4.app.ShareCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -105,17 +106,14 @@ class PetDetailActivity : AppCompatActivity() {
 
 
     private fun menuMailSelected(): Boolean {
-        val to = catInfo.email
-        val text = getString(R.string.email_text, catInfo.name)
-        val emailIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            data = Uri.parse("mailto:")
-            type = "text/plain"
-            putExtra(Intent.EXTRA_EMAIL, to)
-            putExtra(Intent.EXTRA_SUBJECT, catInfo.name)
-            putExtra(Intent.EXTRA_TEXT, text)
-        }
-        startActivity(Intent.createChooser(emailIntent, getString(R.string.mail)))
+        ShareCompat.IntentBuilder.from(this)
+                .setType("message/rfc822")
+                .addEmailTo(catInfo.email)
+                .setSubject(catInfo.name)
+                .setText(getString(R.string.email_text, catInfo.name))
+                //.setHtmlText(body) //If you are using HTML in your body text
+                .setChooserTitle(getString(R.string.mail))
+                .startChooser()
         return true
     }
 

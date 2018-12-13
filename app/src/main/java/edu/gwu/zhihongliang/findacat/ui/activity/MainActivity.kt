@@ -20,6 +20,12 @@ import edu.gwu.zhihongliang.findacat.ui.fragment.FindFragment
 import edu.gwu.zhihongliang.findacat.util.ConnectivityUtil
 import edu.gwu.zhihongliang.findacat.util.NotifyUtil
 import kotlinx.android.synthetic.main.activity_main.*
+import edu.gwu.zhihongliang.findacat.R.id.bottomNavigationView
+import edu.gwu.zhihongliang.findacat.R.id.bottomNavigationView
+
+
+
+
 
 
 class MainActivity : AppCompatActivity(),
@@ -27,7 +33,7 @@ class MainActivity : AppCompatActivity(),
         CatFactsApi.OnCompleteListener {
 
     private val TAG = "MainActivity"
-    private var prevBottomNaviSelected = -1
+    private var currentSelectedBottomNavi = -1
     private val catFacts = CatFactsApi(this)
 
     companion object {
@@ -58,7 +64,7 @@ class MainActivity : AppCompatActivity(),
             LocationDetector.LOCATION_PERMISSION_REQUEST_CODE -> {
                 if (permissions.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.i(TAG, "ACCESS_FINE_LOCATION permission granted")
-                    prevBottomNaviSelected = -1
+                    currentSelectedBottomNavi = -1
                     bottomNavigationView.selectedItemId = R.id.navi_home
                 } else {
                     // permission denied
@@ -88,7 +94,7 @@ class MainActivity : AppCompatActivity(),
                     } else if (result != null) {
                         val zip = result.value
                         Log.i(TAG, "search zip: $zip")
-                        prevBottomNaviSelected = R.id.navi_home
+                        currentSelectedBottomNavi = R.id.navi_home
                         bottomNavigationView.selectedItemId = R.id.navi_home
                         // open FindFragment with argument
                         val fragment = FindFragment.newInstance().apply {
@@ -134,21 +140,33 @@ class MainActivity : AppCompatActivity(),
 
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when (item?.itemId) {
-            R.id.navi_home -> if (prevBottomNaviSelected != R.id.navi_home) {
+        when (item.itemId) {
+            R.id.navi_home -> if (currentSelectedBottomNavi != R.id.navi_home) {
                 //open find cat fragment
                 supportFragmentManager.beginTransaction().replace(R.id.container, FindFragment.newInstance()).commit()
-                prevBottomNaviSelected = R.id.navi_home
+                currentSelectedBottomNavi = R.id.navi_home
             }
 
-            R.id.navi_favourite -> if (prevBottomNaviSelected != R.id.navi_favourite) {
+            R.id.navi_favourite -> if (currentSelectedBottomNavi != R.id.navi_favourite) {
                 //open favourite cat fragment
                 supportFragmentManager.beginTransaction().replace(R.id.container, FavouriteFragment.newInstance()).commit()
-                prevBottomNaviSelected = R.id.navi_favourite
+                currentSelectedBottomNavi = R.id.navi_favourite
             }
             else -> return false
         }
         return true
+    }
+
+    public override fun onSaveInstanceState(savedInstanceState: Bundle) {
+        super.onSaveInstanceState(savedInstanceState)
+        savedInstanceState.putInt("SelectedItemId", bottomNavigationView.selectedItemId)
+    }
+
+    public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val selectedItemId = savedInstanceState.getInt("SelectedItemId")
+        currentSelectedBottomNavi = -1
+        bottomNavigationView.selectedItemId = selectedItemId
     }
 
 }
